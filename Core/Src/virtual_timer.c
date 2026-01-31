@@ -1,4 +1,6 @@
 #include "virtual_timer.h"
+#include <stdlib.h>
+#include <string.h>
 
 VirtualTimer InitializeTimer(uint32_t duration, callback cb) {
     uint32_t start_time = HAL_GetTick();
@@ -14,7 +16,7 @@ TimerGroup* InitializeTimerGroup(VirtualTimer tg[5]) {
 }
 
 void TickTimer(TimerGroup* tg) {
-    curr_time = HAL_GetTick();
+    uint32_t curr_time = HAL_GetTick();
 
     for (int i = 0; i < 5; i++) {
         if (curr_time - tg->tg[i].start_time > tg->tg[i].duration) {

@@ -1,4 +1,5 @@
 #include "corner.h"
+#include <stdbool.h>
 
 corners_ corners;
 
