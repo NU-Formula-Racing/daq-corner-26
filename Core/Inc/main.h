@@ -57,6 +57,18 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define ADC_PWDN_Pin GPIO_PIN_0
+#define ADC_PWDN_GPIO_Port GPIOC
+#define YELLOW_LED_Pin GPIO_PIN_4
+#define YELLOW_LED_GPIO_Port GPIOC
+#define YELLOW_LEDC5_Pin GPIO_PIN_5
+#define YELLOW_LEDC5_GPIO_Port GPIOC
+#define RED_LED_Pin GPIO_PIN_0
+#define RED_LED_GPIO_Port GPIOB
+#define BROKER_CONFIG1_Pin GPIO_PIN_8
+#define BROKER_CONFIG1_GPIO_Port GPIOC
+#define BROKER_CONFIG2_Pin GPIO_PIN_9
+#define BROKER_CONFIG2_GPIO_Port GPIOC
 
 /* USER CODE BEGIN Private defines */
 

@@ -60,8 +60,8 @@ all: main-build
 main-build: daq-corner-26.elf secondary-outputs
 
 # Tool invocations
-daq-corner-26.elf daq-corner-26.map: $(OBJS) $(USER_OBJS) /home/arthur/Formula26/i2ctemp/STM32F405RGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "daq-corner-26.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/arthur/Formula26/i2ctemp/STM32F405RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="daq-corner-26.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+daq-corner-26.elf daq-corner-26.map: $(OBJS) $(USER_OBJS) /Users/ryanboyle/Documents/formula/nfr26/daq-corner-26/STM32F405RGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "daq-corner-26.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/Users/ryanboyle/Documents/formula/nfr26/daq-corner-26/STM32F405RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="daq-corner-26.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
