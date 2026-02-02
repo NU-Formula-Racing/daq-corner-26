@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "stdio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -65,6 +66,16 @@ static void MX_ADC1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+int _write(int file, char *ptr, int len)
+{
+  int DataIdx;
+  for (DataIdx = 0; DataIdx < len; DataIdx++)
+  {
+    ITM_SendChar(*ptr++);
+  }
+  return len;
+}
+
 
 /* USER CODE END 0 */
 
@@ -111,6 +122,7 @@ int main(void)
   {
     /* USER CODE END WHILE */
 	HAL_GPIO_TogglePin(GPIOB, RED_LED_Pin);
+	printf("Hello, world!\n");
 	HAL_Delay(500);
 
     /* USER CODE BEGIN 3 */
