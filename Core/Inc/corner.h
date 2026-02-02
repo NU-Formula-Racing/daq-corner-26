@@ -1,5 +1,4 @@
-#include "stm32f405xx.h"
-#include "stm32f4xx_hal_gpio.h"
+#include "stm32f4xx_hal.h"
 
 // Position of the corner broker (front, left)
 enum CornerPosition {
