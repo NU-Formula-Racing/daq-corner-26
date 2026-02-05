@@ -121,9 +121,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	HAL_GPIO_TogglePin(GPIOB, RED_LED_Pin);
-	printf("Hello, world!\n");
-	HAL_Delay(500);
+    tick_timers();
 
     /* USER CODE BEGIN 3 */
   }

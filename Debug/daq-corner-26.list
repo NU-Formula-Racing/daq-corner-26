@@ -39,15 +39,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  17 .debug_macro  000029b9  00000000  00000000  000138c7  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   0000dd6c  00000000  00000000  00016280  2**0
+ 18 .debug_line   0000ddee  00000000  00000000  00016280  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    000caa0e  00000000  00000000  00023fec  2**0
+ 19 .debug_str    000ca9d4  00000000  00000000  0002406e  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .comment      00000043  00000000  00000000  000ee9fa  2**0
+ 20 .comment      00000043  00000000  00000000  000eea42  2**0
                   CONTENTS, READONLY
- 21 .debug_frame  000037e4  00000000  00000000  000eea40  2**2
+ 21 .debug_frame  000037e4  00000000  00000000  000eea88  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 22 .debug_line_str 00000065  00000000  00000000  000f2224  2**0
+ 22 .debug_line_str 00000050  00000000  00000000  000f226c  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1792,15 +1792,27 @@ void SysTick_Handler(void)
  8000c54:	bd80      	pop	{r7, pc}
 
 08000c56 <_read>:
+  _kill(status, -1);
+  while (1) {}    /* Make sure we hang here */
+}
+
+__attribute__((weak)) int _read(int file, char *ptr, int len)
+{
  8000c56:	b580      	push	{r7, lr}
  8000c58:	b086      	sub	sp, #24
  8000c5a:	af00      	add	r7, sp, #0
  8000c5c:	60f8      	str	r0, [r7, #12]
  8000c5e:	60b9      	str	r1, [r7, #8]
  8000c60:	607a      	str	r2, [r7, #4]
+  (void)file;
+  int DataIdx;
+
+  for (DataIdx = 0; DataIdx < len; DataIdx++)
  8000c62:	2300      	movs	r3, #0
  8000c64:	617b      	str	r3, [r7, #20]
  8000c66:	e00a      	b.n	8000c7e <_read+0x28>
+  {
+    *ptr++ = __io_getchar();
  8000c68:	f3af 8000 	nop.w
  8000c6c:	4601      	mov	r1, r0
  8000c6e:	68bb      	ldr	r3, [r7, #8]
@@ -1808,6 +1820,7 @@ void SysTick_Handler(void)
  8000c72:	60ba      	str	r2, [r7, #8]
  8000c74:	b2ca      	uxtb	r2, r1
  8000c76:	701a      	strb	r2, [r3, #0]
+  for (DataIdx = 0; DataIdx < len; DataIdx++)
  8000c78:	697b      	ldr	r3, [r7, #20]
  8000c7a:	3301      	adds	r3, #1
  8000c7c:	617b      	str	r3, [r7, #20]
@@ -1815,18 +1828,31 @@ void SysTick_Handler(void)
  8000c80:	687b      	ldr	r3, [r7, #4]
  8000c82:	429a      	cmp	r2, r3
  8000c84:	dbf0      	blt.n	8000c68 <_read+0x12>
+  }
+
+  return len;
  8000c86:	687b      	ldr	r3, [r7, #4]
+}
  8000c88:	4618      	mov	r0, r3
  8000c8a:	3718      	adds	r7, #24
  8000c8c:	46bd      	mov	sp, r7
  8000c8e:	bd80      	pop	{r7, pc}
 
 08000c90 <_close>:
+  }
+  return len;
+}
+
+int _close(int file)
+{
  8000c90:	b480      	push	{r7}
  8000c92:	b083      	sub	sp, #12
  8000c94:	af00      	add	r7, sp, #0
  8000c96:	6078      	str	r0, [r7, #4]
+  (void)file;
+  return -1;
  8000c98:	f04f 33ff 	mov.w	r3, #4294967295	@ 0xffffffff
+}
  8000c9c:	4618      	mov	r0, r3
  8000c9e:	370c      	adds	r7, #12
  8000ca0:	46bd      	mov	sp, r7
@@ -1834,15 +1860,23 @@ void SysTick_Handler(void)
  8000ca6:	4770      	bx	lr
 
 08000ca8 <_fstat>:
+
+
+int _fstat(int file, struct stat *st)
+{
  8000ca8:	b480      	push	{r7}
  8000caa:	b083      	sub	sp, #12
  8000cac:	af00      	add	r7, sp, #0
  8000cae:	6078      	str	r0, [r7, #4]
  8000cb0:	6039      	str	r1, [r7, #0]
+  (void)file;
+  st->st_mode = S_IFCHR;
  8000cb2:	683b      	ldr	r3, [r7, #0]
  8000cb4:	f44f 5200 	mov.w	r2, #8192	@ 0x2000
  8000cb8:	605a      	str	r2, [r3, #4]
+  return 0;
  8000cba:	2300      	movs	r3, #0
+}
  8000cbc:	4618      	mov	r0, r3
  8000cbe:	370c      	adds	r7, #12
  8000cc0:	46bd      	mov	sp, r7
@@ -1850,11 +1884,17 @@ void SysTick_Handler(void)
  8000cc6:	4770      	bx	lr
 
 08000cc8 <_isatty>:
+
+int _isatty(int file)
+{
  8000cc8:	b480      	push	{r7}
  8000cca:	b083      	sub	sp, #12
  8000ccc:	af00      	add	r7, sp, #0
  8000cce:	6078      	str	r0, [r7, #4]
+  (void)file;
+  return 1;
  8000cd0:	2301      	movs	r3, #1
+}
  8000cd2:	4618      	mov	r0, r3
  8000cd4:	370c      	adds	r7, #12
  8000cd6:	46bd      	mov	sp, r7
@@ -1862,13 +1902,21 @@ void SysTick_Handler(void)
  8000cdc:	4770      	bx	lr
 
 08000cde <_lseek>:
+
+int _lseek(int file, int ptr, int dir)
+{
  8000cde:	b480      	push	{r7}
  8000ce0:	b085      	sub	sp, #20
  8000ce2:	af00      	add	r7, sp, #0
  8000ce4:	60f8      	str	r0, [r7, #12]
  8000ce6:	60b9      	str	r1, [r7, #8]
  8000ce8:	607a      	str	r2, [r7, #4]
+  (void)file;
+  (void)ptr;
+  (void)dir;
+  return 0;
  8000cea:	2300      	movs	r3, #0
+}
  8000cec:	4618      	mov	r0, r3
  8000cee:	3714      	adds	r7, #20
  8000cf0:	46bd      	mov	sp, r7
@@ -1876,23 +1924,44 @@ void SysTick_Handler(void)
  8000cf6:	4770      	bx	lr
 
 08000cf8 <_sbrk>:
+ *
+ * @param incr Memory size
+ * @return Pointer to allocated memory
+ */
+void *_sbrk(ptrdiff_t incr)
+{
  8000cf8:	b580      	push	{r7, lr}
  8000cfa:	b086      	sub	sp, #24
  8000cfc:	af00      	add	r7, sp, #0
  8000cfe:	6078      	str	r0, [r7, #4]
+  extern uint8_t _end; /* Symbol defined in the linker script */
+  extern uint8_t _estack; /* Symbol defined in the linker script */
+  extern uint32_t _Min_Stack_Size; /* Symbol defined in the linker script */
+  const uint32_t stack_limit = (uint32_t)&_estack - (uint32_t)&_Min_Stack_Size;
  8000d00:	4a14      	ldr	r2, [pc, #80]	@ (8000d54 <_sbrk+0x5c>)
  8000d02:	4b15      	ldr	r3, [pc, #84]	@ (8000d58 <_sbrk+0x60>)
  8000d04:	1ad3      	subs	r3, r2, r3
  8000d06:	617b      	str	r3, [r7, #20]
+  const uint8_t *max_heap = (uint8_t *)stack_limit;
  8000d08:	697b      	ldr	r3, [r7, #20]
  8000d0a:	613b      	str	r3, [r7, #16]
+  uint8_t *prev_heap_end;
+
+  /* Initialize heap end at first call */
+  if (NULL == __sbrk_heap_end)
  8000d0c:	4b13      	ldr	r3, [pc, #76]	@ (8000d5c <_sbrk+0x64>)
  8000d0e:	681b      	ldr	r3, [r3, #0]
  8000d10:	2b00      	cmp	r3, #0
  8000d12:	d102      	bne.n	8000d1a <_sbrk+0x22>
+  {
+    __sbrk_heap_end = &_end;
  8000d14:	4b11      	ldr	r3, [pc, #68]	@ (8000d5c <_sbrk+0x64>)
  8000d16:	4a12      	ldr	r2, [pc, #72]	@ (8000d60 <_sbrk+0x68>)
  8000d18:	601a      	str	r2, [r3, #0]
+  }
+
+  /* Protect heap from growing into the reserved MSP stack */
+  if (__sbrk_heap_end + incr > max_heap)
  8000d1a:	4b10      	ldr	r3, [pc, #64]	@ (8000d5c <_sbrk+0x64>)
  8000d1c:	681a      	ldr	r2, [r3, #0]
  8000d1e:	687b      	ldr	r3, [r7, #4]
@@ -1900,22 +1969,32 @@ void SysTick_Handler(void)
  8000d22:	693a      	ldr	r2, [r7, #16]
  8000d24:	429a      	cmp	r2, r3
  8000d26:	d207      	bcs.n	8000d38 <_sbrk+0x40>
+  {
+    errno = ENOMEM;
  8000d28:	f001 ff3a 	bl	8002ba0 <__errno>
  8000d2c:	4603      	mov	r3, r0
  8000d2e:	220c      	movs	r2, #12
  8000d30:	601a      	str	r2, [r3, #0]
+    return (void *)-1;
  8000d32:	f04f 33ff 	mov.w	r3, #4294967295	@ 0xffffffff
  8000d36:	e009      	b.n	8000d4c <_sbrk+0x54>
+  }
+
+  prev_heap_end = __sbrk_heap_end;
  8000d38:	4b08      	ldr	r3, [pc, #32]	@ (8000d5c <_sbrk+0x64>)
  8000d3a:	681b      	ldr	r3, [r3, #0]
  8000d3c:	60fb      	str	r3, [r7, #12]
+  __sbrk_heap_end += incr;
  8000d3e:	4b07      	ldr	r3, [pc, #28]	@ (8000d5c <_sbrk+0x64>)
  8000d40:	681a      	ldr	r2, [r3, #0]
  8000d42:	687b      	ldr	r3, [r7, #4]
  8000d44:	4413      	add	r3, r2
  8000d46:	4a05      	ldr	r2, [pc, #20]	@ (8000d5c <_sbrk+0x64>)
  8000d48:	6013      	str	r3, [r2, #0]
+
+  return (void *)prev_heap_end;
  8000d4a:	68fb      	ldr	r3, [r7, #12]
+}
  8000d4c:	4618      	mov	r0, r3
  8000d4e:	3718      	adds	r7, #24
  8000d50:	46bd      	mov	sp, r7
