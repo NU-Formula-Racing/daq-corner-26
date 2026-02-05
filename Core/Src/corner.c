@@ -12,7 +12,7 @@ void initialize() {
     corners.corner_pos = (enum CornerPosition)((front << 1) | left);
 
     VirtualTimer sg_tg = InitializeTimer(500, sg_timer_group);
-    VirtualTimer tg1 = InitializeTimer(500, placeholder_group);
+    VirtualTimer tg1 = InitializeTimer(500, hello_group);
     VirtualTimer tg2 = InitializeTimer(500, placeholder_group);
     VirtualTimer tg3 = InitializeTimer(500, placeholder_group);
     VirtualTimer tg4 = InitializeTimer(500, placeholder_group);
@@ -31,6 +31,10 @@ void sg_timer_group() {
             printf("spi_rx[%d] = 0x%02X\n", i, corners.spi_rx[i]);
         }
     }
+}
+
+void hello_group() {
+    printf("Hello from timer group!\n");
 }
 
 void placeholder_group() {

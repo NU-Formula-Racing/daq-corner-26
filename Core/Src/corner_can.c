@@ -13,17 +13,17 @@ void Corner_Initialize_Can(cornerboard_ *cornerboard)
 	// Enable notifications (interrupts) for CAN
 	HAL_CAN_ActivateNotification(corner_can.cornerboard->hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
         
-        int pos = corner_can.cornerboard->corner.corner_pos;
+    //    int pos = corner_can.cornerboard->corner.corner_pos;
 
 	// Temperature message 1 header initialization (first 4 temps)
 	// Base ID 520 (0x208), each corner gets 2 IDs
-	corner_can.TxHeaderTemperatures1_.StdId = 520 + (corner_can.cornerboard->corner.corner_pos * 2);
+	corner_can.TxHeaderTemperatures1_.StdId = 520 + (corner_can.cornerboard->corner_pos * 2);
 	corner_can.TxHeaderTemperatures1_.IDE = CAN_ID_STD;
 	corner_can.TxHeaderTemperatures1_.RTR = CAN_RTR_DATA;
 	corner_can.TxHeaderTemperatures1_.DLC = 8;
 
 	// Temperature message 2 header initialization (last 4 temps)
-	corner_can.TxHeaderTemperatures2_.StdId = 521 + (corner_can.cornerboard->corner.corner_pos * 2);
+	corner_can.TxHeaderTemperatures2_.StdId = 521 + (corner_can.cornerboard->corner_pos * 2);
 	corner_can.TxHeaderTemperatures2_.IDE = CAN_ID_STD;
 	corner_can.TxHeaderTemperatures2_.RTR = CAN_RTR_DATA;
 	corner_can.TxHeaderTemperatures2_.DLC = 8;

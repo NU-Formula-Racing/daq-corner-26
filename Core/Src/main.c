@@ -121,7 +121,9 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-    tick_timers();
+    // tick_timers();
+    printf("Main loop tick.\n");
+    HAL_Delay(500);
 
     /* USER CODE BEGIN 3 */
   }

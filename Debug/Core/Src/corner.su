@@ -1,1 +1,5 @@
-../Core/Src/corner.c:6:6:initialize	16	static
+../Core/Src/corner.c:6:6:initialize	136	static
+../Core/Src/corner.c:23:6:tick_timers	8	static
+../Core/Src/corner.c:27:6:sg_timer_group	16	static
+../Core/Src/corner.c:36:6:hello_group	8	static
+../Core/Src/corner.c:40:6:placeholder_group	4	static
