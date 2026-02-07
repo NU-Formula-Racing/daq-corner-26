@@ -55,6 +55,12 @@ void temp_can_loop()
 	                  corner_can.txDataTemperatures2_, &corner_can.TxMailBox_);
 }
 
+void sg_can_loop() {
+	populateCorner_SgMessages(corner_can.txDataSg_, 0);
+	send_can_messages(corner_can.cornerboard->hcan, &corner_can.TxHeaderSg_,
+	                  corner_can.txDataSg_, &corner_can.TxMailBox_);
+}
+
 void populateCorner_TemperatureMessages(uint8_t *data, int msg_num)
 {
 	RawCanSignal signals[4];
@@ -68,4 +74,15 @@ void populateCorner_TemperatureMessages(uint8_t *data, int msg_num)
 	}
 
 	encodeSignals(data, 4, signals[0], signals[1], signals[2], signals[3]);
+}
+
+void populateCorner_SgMessages(uint8_t *data, int msg_num)
+{
+	RawCanSignal signals[3];
+
+	for(int i = 0; i < 3; i++) {
+		populateRawMessage(&signals[i], corner_can.cornerboard->spi_rx[i], 0, 1, 0);
+	}
+
+	encodeSignals(data, 3, signals[0], signals[1], signals[2]);
 }

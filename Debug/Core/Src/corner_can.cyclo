@@ -1,4 +1,6 @@
 ../Core/Src/corner_can.c:5:6:Corner_Initialize_Can	1
 ../Core/Src/corner_can.c:32:9:send_can_messages	2
 ../Core/Src/corner_can.c:45:6:temp_can_loop	1
-../Core/Src/corner_can.c:58:6:populateCorner_TemperatureMessages	2
+../Core/Src/corner_can.c:58:6:sg_can_loop	1
+../Core/Src/corner_can.c:64:6:populateCorner_TemperatureMessages	2
+../Core/Src/corner_can.c:79:6:populateCorner_SgMessages	2

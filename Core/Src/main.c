@@ -113,7 +113,7 @@ int main(void)
   MX_CAN1_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
-  initialize(&hspi1);
+  initialize(&hspi1, &hcan1, &hi2c1);
 
   /* USER CODE END 2 */
 
