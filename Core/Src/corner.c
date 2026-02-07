@@ -3,7 +3,7 @@
 
 cornerboard_ corners;
 
-void initialize() {
+void initialize(SPI_HandleTypeDef *hspi) {
 
     // Read the position of the corner board
     bool front = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_8);
@@ -18,6 +18,11 @@ void initialize() {
     VirtualTimer tg4 = InitializeTimer(500, placeholder_group);
     VirtualTimer total_tg[5] = {sg_tg, tg1, tg2, tg3, tg4};
     corners.tg = InitializeTimerGroup(total_tg);
+
+    corners.hspi = hspi;
+
+    // Set PDWN pin to low
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
 }
 
 void tick_timers() {
@@ -25,12 +30,13 @@ void tick_timers() {
 }
 
 void sg_timer_group() {
-    if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6) == GPIO_PIN_SET) {
-        Read_ADC_Data(corners.hspi, corners.spi_rx);
-        for (int i=0; i<4; i++) {
-            printf("spi_rx[%d] = 0x%02X\n", i, corners.spi_rx[i]);
-        }
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
+    while (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6) == GPIO_PIN_SET) {}
+    Read_ADC_Data(corners.hspi, corners.spi_rx);
+    for (int i=0; i<4; i++) {
+        printf("spi_rx[%d] = 0x%02X\n", i, corners.spi_rx[i]);
     }
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
 }
 
 void hello_group() {
