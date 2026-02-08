@@ -36,14 +36,19 @@ uint8_t send_can_messages(CAN_HandleTypeDef *hcan,
                           CAN_TxHeaderTypeDef *TxHeader, uint8_t *data,
                           uint32_t *TxMailBox) {
   // Send message
-  if (HAL_CAN_GetTxMailboxesFreeLevel(&hcan) > 0) {
+  printf("Mailboxes Free Level: %d\n", HAL_CAN_GetTxMailboxesFreeLevel(hcan));
+  if (HAL_CAN_GetTxMailboxesFreeLevel(hcan) > 0) {
+
     printf("Sending CAN message\n");
+
     HAL_StatusTypeDef msg_status =
         HAL_CAN_AddTxMessage(hcan, TxHeader, data, TxMailBox);
+
     if (msg_status != HAL_OK) {
       printf("Failed to send CAN message. Status: %d\n", msg_status);
       // Error handling
       return 1;
+
     } else {
       printf("CAN message sent successfully\n");
     }
