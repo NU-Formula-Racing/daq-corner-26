@@ -30,12 +30,7 @@ Core/Src/stm32f4xx_hal_msp.o: ../Core/Src/stm32f4xx_hal_msp.c \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_i2c_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h \
- ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_spi.h \
- ../Core/Inc/corner.h \
- ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f405xx.h \
- ../Core/Inc/corner_can.h ../Core/Inc/can_driver.h \
- ../Core/Inc/corner_main_struct.h ../Core/Inc/temp.h \
- ../Core/Inc/virtual_timer.h ../Core/Inc/corner_driver.h
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_spi.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -69,11 +64,3 @@ Core/Src/stm32f4xx_hal_msp.o: ../Core/Src/stm32f4xx_hal_msp.c \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_spi.h:
-../Core/Inc/corner.h:
-../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f405xx.h:
-../Core/Inc/corner_can.h:
-../Core/Inc/can_driver.h:
-../Core/Inc/corner_main_struct.h:
-../Core/Inc/temp.h:
-../Core/Inc/virtual_timer.h:
-../Core/Inc/corner_driver.h:

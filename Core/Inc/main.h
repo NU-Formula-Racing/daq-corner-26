@@ -28,7 +28,6 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
-#include "corner.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -70,9 +69,6 @@ void Error_Handler(void);
 #define BROKER_CONFIG1_GPIO_Port GPIOC
 #define BROKER_CONFIG2_Pin GPIO_PIN_9
 #define BROKER_CONFIG2_GPIO_Port GPIOC
-#define DRDY_GPIO_Port GPIOA
-#define DRDY_Pin GPIO_PIN_6
-
 
 /* USER CODE BEGIN Private defines */
 
