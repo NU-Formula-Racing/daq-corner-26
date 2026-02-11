@@ -3,7 +3,7 @@
 
 cornerboard_ corners;
 
-void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan, I2C_HandleTypeDef *hi2c) {
+void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc) {
 
     // Read the position of the corner board
     bool front = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_8);
@@ -14,12 +14,13 @@ void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan, I2C_HandleType
     corners.hspi = hspi;
     corners.hcan = hcan;
     corners.hi2c = hi2c;
+    corners.hadc = hadc;
 
     Corner_Initialize_Can(&corners);
 
-    VirtualTimer sg_tg = InitializeTimer(500, sg_timer_group);
-    VirtualTimer tg1 = InitializeTimer(500, sg_can_loop);
-    VirtualTimer tg2 = InitializeTimer(500, placeholder_group);
+    VirtualTimer sg_tg = InitializeTimer(10, sg_timer_group);
+    VirtualTimer tg1 = InitializeTimer(10, sus_pot_timer_group);
+    VirtualTimer tg2 = InitializeTimer(10, main_can_loop);
     VirtualTimer tg3 = InitializeTimer(500, placeholder_group);
     VirtualTimer tg4 = InitializeTimer(500, placeholder_group);
     VirtualTimer total_tg[5] = {sg_tg, tg1, tg2, tg3, tg4};
@@ -46,6 +47,10 @@ void sg_timer_group() {
 
     printf("adc val: %ld\n", adc_val);
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
+}
+
+void sus_pot_timer_group() {
+    Read_Internal_ADC_Data(corners.hadc, &corners.sus_pot_data);
 }
 
 void placeholder_group() {

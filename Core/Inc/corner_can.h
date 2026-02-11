@@ -22,6 +22,9 @@ typedef struct
 
 	CAN_TxHeaderTypeDef TxHeaderSg_;
 	uint8_t txDataSg_[8];
+
+	CAN_TxHeaderTypeDef TxHeaderSusPot_;
+	uint8_t txDataSusPot_[8];
 } corner_can_;
 
 void Corner_Initialize_Can(cornerboard_ *cornerboard);
@@ -30,8 +33,8 @@ uint8_t send_can_messages(CAN_HandleTypeDef *hcan, CAN_TxHeaderTypeDef *TxHeader
 
 // CAN Loop
 void temp_can_loop();
-void sg_can_loop();
+void main_can_loop();
 
 void populateCorner_TemperatureMessages(uint8_t *data, int msg_num);
-void populateCorner_SgMessages(uint8_t *data, int msg_num);
+void populateCorner_Messages(uint8_t *data);
 

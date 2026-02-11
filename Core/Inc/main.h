@@ -72,6 +72,9 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 
+// Multiplier for sg value
+#define SG_MULTIPLIER 1
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

@@ -20,10 +20,13 @@ typedef struct
 
 	// Handles
 	I2C_HandleTypeDef *hi2c;
-	uint8_t spi_rx[4];
-
 	CAN_HandleTypeDef *hcan;
 	SPI_HandleTypeDef *hspi;
+	ADC_HandleTypeDef *hadc;
+	
+	// Buffers
+	uint8_t spi_rx[4];
+	uint16_t sus_pot_data;
 
 	// Timer group
 	TimerGroup *tg;

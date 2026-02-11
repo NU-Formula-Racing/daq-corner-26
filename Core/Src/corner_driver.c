@@ -9,3 +9,13 @@ void Read_ADC_Data(SPI_HandleTypeDef *hspi, uint8_t *spi_rx) {
   //     printf("ERROR\n");
   // }
 }
+
+void Read_Internal_ADC_Data(ADC_HandleTypeDef *hadc, uint16_t *adc_val) {
+  HAL_ADC_Start(hadc);
+  if (HAL_ADC_PollForConversion(hadc, 100) == HAL_OK) {
+    *adc_val = (uint16_t)HAL_ADC_GetValue(hadc);
+    printf("Internal ADC Value: %lu\n", *adc_val);
+  } else {
+    printf("Failed to read internal ADC value.\n");
+  }
+}

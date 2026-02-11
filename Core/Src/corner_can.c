@@ -19,17 +19,29 @@ void Corner_Initialize_Can(cornerboard_ *cornerboard) {
   // Temperature message 1 header initialization (first 4 temps)
   // Base ID 520 (0x208), each corner gets 2 IDs
   corner_can.TxHeaderTemperatures1_.StdId =
-      520 + (corner_can.cornerboard->corner_pos * 2);
+      0x530 + (corner_can.cornerboard->corner_pos * 2);
   corner_can.TxHeaderTemperatures1_.IDE = CAN_ID_STD;
   corner_can.TxHeaderTemperatures1_.RTR = CAN_RTR_DATA;
   corner_can.TxHeaderTemperatures1_.DLC = 8;
 
   // Temperature message 2 header initialization (last 4 temps)
   corner_can.TxHeaderTemperatures2_.StdId =
-      521 + (corner_can.cornerboard->corner_pos * 2);
+      0x531 + (corner_can.cornerboard->corner_pos * 2);
   corner_can.TxHeaderTemperatures2_.IDE = CAN_ID_STD;
   corner_can.TxHeaderTemperatures2_.RTR = CAN_RTR_DATA;
   corner_can.TxHeaderTemperatures2_.DLC = 8;
+
+  corner_can.TxHeaderSg_.StdId = 
+      0x538 + (corner_can.cornerboard->corner_pos * 2);
+  corner_can.TxHeaderSg_.IDE = CAN_ID_STD;
+  corner_can.TxHeaderSg_.RTR = CAN_RTR_DATA;
+  corner_can.TxHeaderSg_.DLC = 8;
+
+  corner_can.TxHeaderSusPot_.StdId = 
+      0x539 + (corner_can.cornerboard->corner_pos * 2);
+  corner_can.TxHeaderSusPot_.IDE = CAN_ID_STD;
+  corner_can.TxHeaderSusPot_.RTR = CAN_RTR_DATA;
+  corner_can.TxHeaderSusPot_.DLC = 8;
 }
 
 uint8_t send_can_messages(CAN_HandleTypeDef *hcan,
@@ -73,8 +85,8 @@ void temp_can_loop() {
                     corner_can.txDataTemperatures2_, &corner_can.TxMailBox_);
 }
 
-void sg_can_loop() {
-  populateCorner_SgMessages(corner_can.txDataSg_, 0);
+void main_can_loop() {
+  populateCorner_Messages(corner_can.txDataSg_);
   send_can_messages(corner_can.cornerboard->hcan, &corner_can.TxHeaderSg_,
                     corner_can.txDataSg_, &corner_can.TxMailBox_);
 }
@@ -95,12 +107,16 @@ void populateCorner_TemperatureMessages(uint8_t *data, int msg_num) {
   encodeSignals(data, 4, signals[0], signals[1], signals[2], signals[3]);
 }
 
-void populateCorner_SgMessages(uint8_t *data, int msg_num) {
-  RawCanSignal signals[3];
+void populateCorner_Messages(uint8_t *data) {
+  RawCanSignal signals[4];
 
-  for (int i = 0; i < 3; i++) {
-    populateRawMessage(&signals[i], corner_can.cornerboard->spi_rx[i], 0, 1, 0);
+  for (int i = 0; i < 2; i++) {
+    populateRawMessage(&signals[i], corner_can.cornerboard->spi_rx[i], 8, 1, 0);
   }
 
-  encodeSignals(data, 3, signals[0], signals[1], signals[2]);
+  populateRawMessage(&signals[2], (uint8_t)(corner_can.cornerboard->sus_pot_data >> 8), 8, 1, 0);
+  populateRawMessage(&signals[3], (uint8_t)(corner_can.cornerboard->sus_pot_data), 8, 1, 0);
+
+
+  encodeSignals(data, 4, signals[0], signals[1], signals[2], signals[3]);
 }
