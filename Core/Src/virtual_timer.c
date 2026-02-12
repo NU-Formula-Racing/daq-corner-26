@@ -8,9 +8,9 @@ VirtualTimer InitializeTimer(uint32_t duration, callback cb) {
     return t;
 }
 
-TimerGroup* InitializeTimerGroup(VirtualTimer tg[5]) {
+TimerGroup* InitializeTimerGroup(VirtualTimer tg[6]) {
     TimerGroup *new_tg = (TimerGroup *) malloc(sizeof(TimerGroup));
-    memcpy(new_tg->tg, tg, sizeof(VirtualTimer) * 5);
+    memcpy(new_tg->tg, tg, sizeof(VirtualTimer) * 6);
 
     return new_tg;
 }
@@ -18,7 +18,7 @@ TimerGroup* InitializeTimerGroup(VirtualTimer tg[5]) {
 void TickTimer(TimerGroup* tg) {
     uint32_t curr_time = HAL_GetTick();
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 6; i++) {
         if (curr_time - tg->tg[i].start_time > tg->tg[i].duration) {
             tg->tg[i].cb();
             tg->tg[i].start_time = curr_time;

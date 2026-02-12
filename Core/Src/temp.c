@@ -24,7 +24,9 @@ HAL_StatusTypeDef Temp_Init(TempSensors *ts, I2C_HandleTypeDef *hi2c) {
 }
 
 HAL_StatusTypeDef Temp_ReadOne(TempSensors *ts, uint8_t channel, float *temp_c) {
+    // printf("Reading temp sensor %d...\n", channel);
     if (channel >= TEMP_NUM_SENSORS) {
+        printf("Invalid temp sensor channel: %d\n", channel);
         return HAL_ERROR;
     }
 
@@ -33,6 +35,7 @@ HAL_StatusTypeDef Temp_ReadOne(TempSensors *ts, uint8_t channel, float *temp_c) 
     // Select mux channel
     status = select_mux_channel(ts, channel);
     if (status != HAL_OK) {
+        printf("Failed to select mux channel %d\n", channel);
         return status;
     }
 
@@ -41,12 +44,14 @@ HAL_StatusTypeDef Temp_ReadOne(TempSensors *ts, uint8_t channel, float *temp_c) 
     status = HAL_I2C_Mem_Read(ts->hi2c, MLX90614_ADDR, MLX90614_REG_TOBJ1,
                               I2C_MEMADD_SIZE_8BIT, buf, 3, I2C_TIMEOUT);
     if (status != HAL_OK) {
+        printf("***FAILED TO READ TEMP SENSOR %d***\n\n", channel);
         return status;
     }
 
     uint16_t raw = buf[0] | (buf[1] << 8);
     *temp_c = raw_to_celsius(raw);
     ts->temps[channel] = *temp_c;
+    // printf("Temp sensor %d: %d C\n\n", channel, (int)(*temp_c));
 
     return HAL_OK;
 }
@@ -56,9 +61,10 @@ HAL_StatusTypeDef Temp_ReadAll(TempSensors *ts) {
     float temp;
 
     for (uint8_t i = 0; i < TEMP_NUM_SENSORS; i++) {
+        // printf("Reading temp sensor %d...\n", i);
         status = Temp_ReadOne(ts, i, &temp);
         if (status != HAL_OK) {
-            return status;
+            // return status;
         }
     }
 

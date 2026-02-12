@@ -1,1 +1,2 @@
 ../Core/Src/corner_driver.c:3:6:Read_ADC_Data	1
+../Core/Src/corner_driver.c:13:6:Read_Internal_ADC_Data	2
