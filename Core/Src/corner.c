@@ -18,16 +18,16 @@ void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan, I2C_HandleType
 
     Corner_Initialize_Can(&corners);
 
-    VirtualTimer sg_tg = InitializeTimer(10, sg_timer_group);
-    VirtualTimer tg1 = InitializeTimer(10, sus_pot_timer_group);
-    VirtualTimer tg2 = InitializeTimer(10, main_can_loop);
+    VirtualTimer sg_tg = InitializeTimer(100, sg_timer_group);
+    VirtualTimer tg1 = InitializeTimer(100, sus_pot_timer_group);
+    VirtualTimer tg2 = InitializeTimer(100, main_can_loop);
     VirtualTimer tg3 = InitializeTimer(500, placeholder_group);
     VirtualTimer tg4 = InitializeTimer(500, placeholder_group);
     VirtualTimer total_tg[5] = {sg_tg, tg1, tg2, tg3, tg4};
     corners.tg = InitializeTimerGroup(total_tg);
 
     // Set PDWN pin to low
-    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
 }
 
 void tick_timers() {
@@ -35,7 +35,7 @@ void tick_timers() {
 }
 
 void sg_timer_group() {
-    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
+    // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
     while (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6) == GPIO_PIN_SET) {}
     Read_ADC_Data(corners.hspi, corners.spi_rx);
     for (int i=0; i<4; i++) {
@@ -46,7 +46,7 @@ void sg_timer_group() {
     float voltage = (float)adc_val * (((0.5 * 3.3)/128)/(pow(2, 23) - 1));
 
     printf("adc val: %ld\n", adc_val);
-    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
+   // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
 }
 
 void sus_pot_timer_group() {
