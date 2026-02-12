@@ -48,11 +48,7 @@ uint8_t send_can_messages(CAN_HandleTypeDef *hcan,
                           CAN_TxHeaderTypeDef *TxHeader, uint8_t *data,
                           uint32_t *TxMailBox) {
   // Send message
-  printf("Mailboxes Free Level: %d\n", HAL_CAN_GetTxMailboxesFreeLevel(hcan));
   if (HAL_CAN_GetTxMailboxesFreeLevel(hcan) > 0) {
-
-    printf("Sending CAN message\n");
-
     HAL_StatusTypeDef msg_status =
         HAL_CAN_AddTxMessage(hcan, TxHeader, data, TxMailBox);
 
@@ -62,7 +58,7 @@ uint8_t send_can_messages(CAN_HandleTypeDef *hcan,
       return 1;
 
     } else {
-      printf("CAN message sent successfully\n");
+      // printf("CAN message sent successfully\n");
     }
   } else {
     printf("No free Tx mailboxes available. Message not sent.\n");
@@ -108,15 +104,16 @@ void populateCorner_TemperatureMessages(uint8_t *data, int msg_num) {
 }
 
 void populateCorner_Messages(uint8_t *data) {
-  RawCanSignal signals[4];
+  RawCanSignal signals[3];
 
-  for (int i = 0; i < 2; i++) {
-    populateRawMessage(&signals[i], corner_can.cornerboard->spi_rx[i], 8, 1, 0);
-  }
+  // for (int i = 0; i < 2; i++) {
+  //   populateRawMessage(&signals[i], corner_can.cornerboard->spi_rx[i], 8, 1, 0);
+  // }
+  populateRawMessage(&signals[0], (uint16_t)(corner_can.cornerboard->strain_gauge_data >> 8), 16, 1, 0);
 
-  populateRawMessage(&signals[2], (uint8_t)(corner_can.cornerboard->sus_pot_data >> 8), 8, 1, 0);
-  populateRawMessage(&signals[3], (uint8_t)(corner_can.cornerboard->sus_pot_data), 8, 1, 0);
+  populateRawMessage(&signals[1], (uint8_t)(corner_can.cornerboard->sus_pot_data >> 8), 8, 1, 0);
+  populateRawMessage(&signals[2], (uint8_t)(corner_can.cornerboard->sus_pot_data), 8, 1, 0);
 
 
-  encodeSignals(data, 4, signals[0], signals[1], signals[2], signals[3]);
+  encodeSignals(data, 3, signals[0], signals[1], signals[2]);
 }

@@ -9,10 +9,10 @@ typedef struct {
 } VirtualTimer;
 
 typedef struct {
-    VirtualTimer tg[5];
+    VirtualTimer tg[6];
 } TimerGroup;
 
 VirtualTimer InitializeTimer(uint32_t duration, callback cb);
-TimerGroup* InitializeTimerGroup(VirtualTimer tg[5]);
+TimerGroup* InitializeTimerGroup(VirtualTimer tg[6]);
 
 void TickTimer(TimerGroup *tg);

@@ -24,7 +24,7 @@ HAL_StatusTypeDef Temp_Init(TempSensors *ts, I2C_HandleTypeDef *hi2c) {
 }
 
 HAL_StatusTypeDef Temp_ReadOne(TempSensors *ts, uint8_t channel, float *temp_c) {
-    printf("Reading temp sensor %d...\n", channel);
+    // printf("Reading temp sensor %d...\n", channel);
     if (channel >= TEMP_NUM_SENSORS) {
         printf("Invalid temp sensor channel: %d\n", channel);
         return HAL_ERROR;
@@ -51,7 +51,7 @@ HAL_StatusTypeDef Temp_ReadOne(TempSensors *ts, uint8_t channel, float *temp_c) 
     uint16_t raw = buf[0] | (buf[1] << 8);
     *temp_c = raw_to_celsius(raw);
     ts->temps[channel] = *temp_c;
-    printf("Temp sensor %d: %d C\n\n", channel, (int)(*temp_c));
+    // printf("Temp sensor %d: %d C\n\n", channel, (int)(*temp_c));
 
     return HAL_OK;
 }

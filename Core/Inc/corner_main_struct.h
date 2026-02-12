@@ -25,7 +25,7 @@ typedef struct
 	ADC_HandleTypeDef *hadc;
 	
 	// Buffers
-	uint8_t spi_rx[4];
+	int16_t strain_gauge_data;
 	uint16_t sus_pot_data;
 
 	// Timer group

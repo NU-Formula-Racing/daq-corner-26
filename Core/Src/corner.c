@@ -18,15 +18,13 @@ void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan, I2C_HandleType
 
     Corner_Initialize_Can(&corners);
 
-    // VirtualTimer sg_tg = InitializeTimer(100, sg_timer_group);
-    // VirtualTimer tg1 = InitializeTimer(100, sus_pot_timer_group);
-    // VirtualTimer tg2 = InitializeTimer(100, main_can_loop);
-    VirtualTimer tg1 = InitializeTimer(500, placeholder_group);
-    VirtualTimer tg2 = InitializeTimer(500, placeholder_group);
-    VirtualTimer tg3 = InitializeTimer(500, placeholder_group);
+    VirtualTimer tg1 = InitializeTimer(100, sg_timer_group);
+    VirtualTimer tg2 = InitializeTimer(100, sus_pot_timer_group);
+    VirtualTimer tg3 = InitializeTimer(100, main_can_loop);
     VirtualTimer tg4 = InitializeTimer(1000, tire_temp_group);
-    VirtualTimer tg5 = InitializeTimer(500, placeholder_group);
-    VirtualTimer total_tg[5] = {tg1, tg2, tg3, tg4, tg5};
+    VirtualTimer tg5 = InitializeTimer(500, print_group);
+    VirtualTimer tg6 = InitializeTimer(200, temp_can_loop);
+    VirtualTimer total_tg[6] = {tg1, tg2, tg3, tg4, tg5, tg6};
     corners.tg = InitializeTimerGroup(total_tg);
 
     // Set PDWN pin to low
@@ -44,18 +42,16 @@ void tick_timers() {
 }
 
 void sg_timer_group() {
-    // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
     while (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6) == GPIO_PIN_SET) {}
-    Read_ADC_Data(corners.hspi, corners.spi_rx);
-    for (int i=0; i<4; i++) {
-        printf("spi_rx[%d] = 0x%02X\n", i, corners.spi_rx[i]);
-    }
-    uint32_t raw = ((int32_t)corners.spi_rx[0] << 16) | ((int32_t)corners.spi_rx[1] << 8) | (int32_t)corners.spi_rx[2];
-    int32_t adc_val = (int32_t)(raw << 8) >> 8;
-    float voltage = (float)adc_val * (((0.5 * 3.3)/128)/(pow(2, 23) - 1));
+    uint8_t spi_rx[4] = {0};
+    Read_ADC_Data(corners.hspi, spi_rx);
+    // for (int i=0; i<4; i++) {
+    //     printf("spi_rx[%d] = 0x%02X\n", i, corners.spi_rx[i]);
+    // }
+    uint32_t raw = ((int32_t)spi_rx[0] << 16) | ((int32_t)spi_rx[1] << 8) | (int32_t)spi_rx[2];
+    corners.strain_gauge_data = (int32_t)(raw << 8) >> 16;
 
-    printf("adc val: %ld\n", adc_val);
-   // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
+    // printf("adc val: %ld\n", adc_val);
 }
 
 void sus_pot_timer_group() {
@@ -66,6 +62,12 @@ void tire_temp_group() {
     Temp_ReadAll(&corners.temp_sensors);
 }
 
-void placeholder_group() {
-    
+void print_group() {
+    printf("Corner Position: %d\n", corners.corner_pos);
+    printf("Strain Gauge Reading: %d\n", corners.strain_gauge_data);
+    printf("Suspension Potentiometer ADC Value: %d\n", corners.sus_pot_data);
+    for (int i = 0; i < TEMP_NUM_SENSORS; i++) {
+        printf("Temp Sensor %d: %d C\n", i, (int)corners.temp_sensors.temps[i]);
+    }
+    printf("\n\n");
 }
