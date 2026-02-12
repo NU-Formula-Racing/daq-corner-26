@@ -2,4 +2,4 @@
 ../Core/Src/temp.c:12:14:raw_to_celsius	1
 ../Core/Src/temp.c:16:19:Temp_Init	2
 ../Core/Src/temp.c:26:19:Temp_ReadOne	4
-../Core/Src/temp.c:54:19:Temp_ReadAll	3
+../Core/Src/temp.c:59:19:Temp_ReadAll	2

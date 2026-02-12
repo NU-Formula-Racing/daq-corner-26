@@ -18,16 +18,25 @@ void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan, I2C_HandleType
 
     Corner_Initialize_Can(&corners);
 
-    VirtualTimer sg_tg = InitializeTimer(100, sg_timer_group);
-    VirtualTimer tg1 = InitializeTimer(100, sus_pot_timer_group);
-    VirtualTimer tg2 = InitializeTimer(100, main_can_loop);
+    // VirtualTimer sg_tg = InitializeTimer(100, sg_timer_group);
+    // VirtualTimer tg1 = InitializeTimer(100, sus_pot_timer_group);
+    // VirtualTimer tg2 = InitializeTimer(100, main_can_loop);
+    VirtualTimer tg1 = InitializeTimer(500, placeholder_group);
+    VirtualTimer tg2 = InitializeTimer(500, placeholder_group);
     VirtualTimer tg3 = InitializeTimer(500, placeholder_group);
-    VirtualTimer tg4 = InitializeTimer(500, placeholder_group);
-    VirtualTimer total_tg[5] = {sg_tg, tg1, tg2, tg3, tg4};
+    VirtualTimer tg4 = InitializeTimer(1000, tire_temp_group);
+    VirtualTimer tg5 = InitializeTimer(500, placeholder_group);
+    VirtualTimer total_tg[5] = {tg1, tg2, tg3, tg4, tg5};
     corners.tg = InitializeTimerGroup(total_tg);
 
     // Set PDWN pin to low
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
+
+    if (Temp_Init(&corners.temp_sensors, corners.hi2c) != HAL_OK) {
+        printf("Failed to initialize temperature sensors\n");
+    } else {
+        printf("Temperature sensors initialized successfully\n");
+    }
 }
 
 void tick_timers() {
@@ -53,6 +62,10 @@ void sus_pot_timer_group() {
     Read_Internal_ADC_Data(corners.hadc, &corners.sus_pot_data);
 }
 
-void placeholder_group() {
+void tire_temp_group() {
+    Temp_ReadAll(&corners.temp_sensors);
+}
 
+void placeholder_group() {
+    
 }
