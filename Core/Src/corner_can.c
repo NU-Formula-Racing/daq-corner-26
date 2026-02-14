@@ -36,12 +36,6 @@ void Corner_Initialize_Can(cornerboard_ *cornerboard) {
   corner_can.TxHeaderSg_.IDE = CAN_ID_STD;
   corner_can.TxHeaderSg_.RTR = CAN_RTR_DATA;
   corner_can.TxHeaderSg_.DLC = 8;
-
-  corner_can.TxHeaderSusPot_.StdId = 
-      0x539 + (corner_can.cornerboard->corner_pos * 2);
-  corner_can.TxHeaderSusPot_.IDE = CAN_ID_STD;
-  corner_can.TxHeaderSusPot_.RTR = CAN_RTR_DATA;
-  corner_can.TxHeaderSusPot_.DLC = 8;
 }
 
 uint8_t send_can_messages(CAN_HandleTypeDef *hcan,

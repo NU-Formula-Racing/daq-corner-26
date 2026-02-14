@@ -1,6 +1,6 @@
 ../Core/Src/corner_can.c:5:6:Corner_Initialize_Can	1
-../Core/Src/corner_can.c:47:9:send_can_messages	3
-../Core/Src/corner_can.c:70:6:temp_can_loop	1
-../Core/Src/corner_can.c:84:6:main_can_loop	1
-../Core/Src/corner_can.c:90:6:populateCorner_TemperatureMessages	2
-../Core/Src/corner_can.c:106:6:populateCorner_Messages	1
+../Core/Src/corner_can.c:41:9:send_can_messages	3
+../Core/Src/corner_can.c:64:6:temp_can_loop	1
+../Core/Src/corner_can.c:78:6:main_can_loop	1
+../Core/Src/corner_can.c:84:6:populateCorner_TemperatureMessages	2
+../Core/Src/corner_can.c:100:6:populateCorner_Messages	1
