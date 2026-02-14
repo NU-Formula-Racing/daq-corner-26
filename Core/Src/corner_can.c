@@ -17,7 +17,7 @@ void Corner_Initialize_Can(cornerboard_ *cornerboard) {
   //    int pos = corner_can.cornerboard->corner.corner_pos;
 
   // Temperature message 1 header initialization (first 4 temps)
-  // Base ID 520 (0x208), each corner gets 2 IDs
+  // Base ID 0x520, each corner gets 2 IDs
   corner_can.TxHeaderTemperatures1_.StdId =
       0x530 + (corner_can.cornerboard->corner_pos * 2);
   corner_can.TxHeaderTemperatures1_.IDE = CAN_ID_STD;
@@ -104,16 +104,23 @@ void populateCorner_TemperatureMessages(uint8_t *data, int msg_num) {
 }
 
 void populateCorner_Messages(uint8_t *data) {
-  RawCanSignal signals[3];
+  RawCanSignal signals[8];
 
   // for (int i = 0; i < 2; i++) {
   //   populateRawMessage(&signals[i], corner_can.cornerboard->spi_rx[i], 8, 1, 0);
   // }
-  populateRawMessage(&signals[0], (uint16_t)(corner_can.cornerboard->strain_gauge_data >> 8), 16, 1, 0);
 
-  populateRawMessage(&signals[1], (uint8_t)(corner_can.cornerboard->sus_pot_data >> 8), 8, 1, 0);
-  populateRawMessage(&signals[2], (uint8_t)(corner_can.cornerboard->sus_pot_data), 8, 1, 0);
+  // send each byte of sg data as a signal in little endian order
+  populateRawMessage(&signals[3], (corner_can.cornerboard->strain_gauge_data >> 24) & 0xFF, 8, 1, 0);
+  populateRawMessage(&signals[2], (corner_can.cornerboard->strain_gauge_data >> 16) & 0xFF, 8, 1, 0);
+  populateRawMessage(&signals[1], (corner_can.cornerboard->strain_gauge_data >> 8) & 0xFF, 8, 1, 0);
+  populateRawMessage(&signals[0], corner_can.cornerboard->strain_gauge_data & 0xFF, 8, 1, 0);
 
+  // send each byte of suspension potentiometer data as a signal in big endian order
+  populateRawMessage(&signals[7], (corner_can.cornerboard->sus_pot_data >> 24) & 0xFF, 8, 1, 0);
+  populateRawMessage(&signals[6], (corner_can.cornerboard->sus_pot_data >> 16) & 0xFF, 8, 1, 0);
+  populateRawMessage(&signals[5], (corner_can.cornerboard->sus_pot_data >> 8) & 0xFF, 8, 1, 0);
+  populateRawMessage(&signals[4], corner_can.cornerboard->sus_pot_data & 0xFF, 8, 1, 0);
 
-  encodeSignals(data, 3, signals[0], signals[1], signals[2]);
+  encodeSignals(data, 8, signals[0], signals[1], signals[2], signals[3], signals[4], signals[5], signals[6], signals[7]);
 }

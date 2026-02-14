@@ -48,8 +48,8 @@ void sg_timer_group() {
     // for (int i=0; i<4; i++) {
     //     printf("spi_rx[%d] = 0x%02X\n", i, corners.spi_rx[i]);
     // }
-    uint32_t raw = ((int32_t)spi_rx[0] << 16) | ((int32_t)spi_rx[1] << 8) | (int32_t)spi_rx[2];
-    corners.strain_gauge_data = (int32_t)(raw << 8) >> 16;
+    int32_t raw = ((spi_rx[0] << 24) | (spi_rx[1] << 16) | spi_rx[2] << 8) >> 8;
+    corners.strain_gauge_data = raw;
 
     // printf("adc val: %ld\n", adc_val);
 }
@@ -64,8 +64,8 @@ void tire_temp_group() {
 
 void print_group() {
     printf("Corner Position: %d\n", corners.corner_pos);
-    printf("Strain Gauge Reading: %d\n", corners.strain_gauge_data);
-    printf("Suspension Potentiometer ADC Value: %d\n", corners.sus_pot_data);
+    printf("Strain Gauge Reading: %ld\n", corners.strain_gauge_data);
+    printf("Suspension Potentiometer ADC Value: %ld\n", corners.sus_pot_data);
     for (int i = 0; i < TEMP_NUM_SENSORS; i++) {
         printf("Temp Sensor %d: %d C\n", i, (int)corners.temp_sensors.temps[i]);
     }
