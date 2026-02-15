@@ -18,9 +18,9 @@ void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan, I2C_HandleType
 
     Corner_Initialize_Can(&corners);
 
-    VirtualTimer tg1 = InitializeTimer(100, sg_timer_group);
-    VirtualTimer tg2 = InitializeTimer(100, sus_pot_timer_group);
-    VirtualTimer tg3 = InitializeTimer(100, main_can_loop);
+    VirtualTimer tg1 = InitializeTimer(30, sg_timer_group);
+    VirtualTimer tg2 = InitializeTimer(30, sus_pot_timer_group);
+    VirtualTimer tg3 = InitializeTimer(30, main_can_loop);
     VirtualTimer tg4 = InitializeTimer(1000, tire_temp_group);
     VirtualTimer tg5 = InitializeTimer(500, print_group);
     VirtualTimer tg6 = InitializeTimer(1000, temp_can_loop);
@@ -42,13 +42,30 @@ void tick_timers() {
 }
 
 void sg_timer_group() {
-    while (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6) == GPIO_PIN_SET) {}
+    // printf("DRDY pin: %d\n", HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6));
+    // while (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6) == GPIO_PIN_SET) {}
+    while (1) {
+        if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6) == GPIO_PIN_RESET) {
+            HAL_Delay(1);
+            if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6) == GPIO_PIN_RESET) {
+                break;
+            }
+            // printf("False DRDY trigger, waiting for next one...\n");
+        }
+    }
     uint8_t spi_rx[4] = {0};
     Read_ADC_Data(corners.hspi, spi_rx);
+    
     // for (int i=0; i<4; i++) {
     //     printf("spi_rx[%d] = 0x%02X\n", i, corners.spi_rx[i]);
     // }
     int32_t raw = ((spi_rx[0] << 24) | (spi_rx[1] << 16) | spi_rx[2] << 8) >> 8;
+    // if raw is close to zero, print
+    // printf("Strain Gauge Raw Value: %ld\n", raw);
+    if (raw > -1000 && raw < 1000) {
+        // printf("oops, raw is close to zero!\n");
+        // while(1);
+    }
     corners.strain_gauge_data = raw;
 
     // printf("adc val: %ld\n", adc_val);
