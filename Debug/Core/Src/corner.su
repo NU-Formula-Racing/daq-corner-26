@@ -1,6 +1,7 @@
 ../Core/Src/corner.c:6:6:initialize	176	static
-../Core/Src/corner.c:40:6:tick_timers	8	static
-../Core/Src/corner.c:44:6:sg_timer_group	16	static
-../Core/Src/corner.c:74:6:sus_pot_timer_group	8	static
-../Core/Src/corner.c:78:6:tire_temp_group	8	static
-../Core/Src/corner.c:82:6:print_group	16	static
+../Core/Src/corner.c:42:6:tick_timers	8	static
+../Core/Src/corner.c:46:6:sg_timer_group	4	static
+../Core/Src/corner.c:76:6:sus_pot_timer_group	8	static
+../Core/Src/corner.c:80:6:tire_temp_group	8	static
+../Core/Src/corner.c:84:6:print_group	16	static
+../Core/Src/corner.c:94:6:SG_Receive_Data	16	static

@@ -1,4 +1,5 @@
-Core/Src/corner.o: ../Core/Src/corner.c ../Core/Inc/corner.h \
+DriversCustom/Ads/ads_driver.o: ../DriversCustom/Ads/ads_driver.c \
+ ../DriversCustom/Ads/ads_driver.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
@@ -31,12 +32,8 @@ Core/Src/corner.o: ../Core/Src/corner.c ../Core/Inc/corner.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_spi.h \
- ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f405xx.h \
- ../Core/Inc/corner_can.h ../Core/Inc/can_driver.h \
- ../Core/Inc/corner_main_struct.h ../Core/Inc/temp.h \
- ../Core/Inc/virtual_timer.h ../Core/Inc/corner_driver.h \
- ../DriversCustom/Ads/ads_driver.h
-../Core/Inc/corner.h:
+ ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f405xx.h
+../DriversCustom/Ads/ads_driver.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h:
@@ -70,10 +67,3 @@ Core/Src/corner.o: ../Core/Src/corner.c ../Core/Inc/corner.h \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_spi.h:
 ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f405xx.h:
-../Core/Inc/corner_can.h:
-../Core/Inc/can_driver.h:
-../Core/Inc/corner_main_struct.h:
-../Core/Inc/temp.h:
-../Core/Inc/virtual_timer.h:
-../Core/Inc/corner_driver.h:
-../DriversCustom/Ads/ads_driver.h:

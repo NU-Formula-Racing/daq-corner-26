@@ -1,0 +1,5 @@
+../DriversCustom/Ads/ads_driver.c:4:6:ADS_GPIO_to_EXTI	32	static
+../DriversCustom/Ads/ads_driver.c:15:6:ADS_GPIO_to_SPI	32	static
+../DriversCustom/Ads/ads_driver.c:27:19:Read_ADS_Data	32	static
+../DriversCustom/Ads/ads_driver.c:38:6:ADS_Enable_EXTI	8	static
+../DriversCustom/Ads/ads_driver.c:44:6:ADS_Transmit_Data	16	static

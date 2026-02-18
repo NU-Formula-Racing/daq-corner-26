@@ -124,6 +124,25 @@ int main(void) {
   /* USER CODE END 3 */
 }
 
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  if (GPIO_Pin != GPIO_PIN_6) {
+    return;
+  }
+
+  SG_Receive_Data();
+}
+
+// void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
+// {
+//   printf("Spi callback called\n");
+//   if (hspi != &hspi1) {
+//     return;
+//   }
+
+//   ADS_Enable_EXTI();
+// }
+
 /**
  * @brief System Clock Configuration
  * @retval None
