@@ -4,6 +4,7 @@
 #include "corner_can.h"
 #include "corner_driver.h"
 #include "ads_driver.h"
+#include "rtos.h"
 #include <math.h>
 #include <stdio.h>
 
