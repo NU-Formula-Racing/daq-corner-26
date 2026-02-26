@@ -2,6 +2,7 @@
 #include "task.h"
 #include "queue.h"
 #include "semphr.h"
+#include "ads_driver.h"
 
 // configMAX_PRIORITIES set to 7
 enum TaskPriority {
@@ -16,17 +17,17 @@ enum TaskPriority {
 
 // Stack size
 enum StackSize {
-    SMALL = 128,
-    MEDIUM = 256,
-    BIG = 512
+    STACK_SMALL = 128,
+    STACK_MEDIUM = 256,
+    STACK_BIG = 512
 };
 
 // Event type
 enum EvType {
     EV_CAN,
-    EV_STAIN,
+    EV_STRAIN,
     EV_SUSPOT,
-    Ev_TEMP
+    EV_TEMP
 };
 
 typedef void (*Job)(void);
@@ -43,12 +44,14 @@ typedef struct {
     TaskHandle_t h;
 } Task;
 
-static void runJob(void *arg);
 void createTask(Task *task);
 
 
 // Events and Queues
 typedef struct {
     enum EvType ev_type;
-    Task task;
+    Job job;
 } Event;
+
+
+extern QueueHandle_t q; 

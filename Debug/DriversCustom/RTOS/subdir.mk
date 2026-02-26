@@ -1,0 +1,27 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+# Toolchain: GNU Tools for STM32 (13.3.rel1)
+################################################################################
+
+# Add inputs and outputs from these tool invocations to the build variables 
+C_SRCS += \
+../DriversCustom/RTOS/rtos.c 
+
+OBJS += \
+./DriversCustom/RTOS/rtos.o 
+
+C_DEPS += \
+./DriversCustom/RTOS/rtos.d 
+
+
+# Each subdirectory must supply rules for building sources it contributes
+DriversCustom/RTOS/%.o DriversCustom/RTOS/%.su DriversCustom/RTOS/%.cyclo: ../DriversCustom/RTOS/%.c DriversCustom/RTOS/subdir.mk
+	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F405xx -c -I../Core/Inc -I../DriversCustom/Ads -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../freertos/include -I../freertos/portable/GCC/ARM_CM4F -I../DriversCustom/RTOS -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
+
+clean: clean-DriversCustom-2f-RTOS
+
+clean-DriversCustom-2f-RTOS:
+	-$(RM) ./DriversCustom/RTOS/rtos.cyclo ./DriversCustom/RTOS/rtos.d ./DriversCustom/RTOS/rtos.o ./DriversCustom/RTOS/rtos.su
+
+.PHONY: clean-DriversCustom-2f-RTOS
+

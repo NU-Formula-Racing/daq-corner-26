@@ -1,7 +1,9 @@
 ../Core/Src/corner.c:6:6:initialize	1
-../Core/Src/corner.c:42:6:tick_timers	1
-../Core/Src/corner.c:46:6:sg_timer_group	1
-../Core/Src/corner.c:76:6:sus_pot_timer_group	1
-../Core/Src/corner.c:80:6:tire_temp_group	1
-../Core/Src/corner.c:84:6:print_group	2
-../Core/Src/corner.c:94:6:SG_Receive_Data	1
+../Core/Src/corner.c:62:6:tick_timers	1
+../Core/Src/corner.c:66:6:sg_timer_group	1
+../Core/Src/corner.c:96:6:sus_pot_timer_group	1
+../Core/Src/corner.c:100:6:tire_temp_group	1
+../Core/Src/corner.c:104:6:print_group	2
+../Core/Src/corner.c:114:6:SG_Receive_Data	1
+../Core/Src/corner.c:121:6:initQueue	1
+../Core/Src/corner.c:125:6:eventLoop	3

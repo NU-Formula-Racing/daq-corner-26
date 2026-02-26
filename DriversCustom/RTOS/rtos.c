@@ -1,5 +1,7 @@
 #include "rtos.h"
 
+QueueHandle_t q = NULL;
+
 static void runJob(void *arg) {
     Task *t = (Task*)arg;
 
@@ -18,17 +20,4 @@ void createTask(Task *task) {
         task->priority,
         &task->h
     );
-}
-
-static QueueHandle_t q;
-
-void initQueue() {
-    q = xQueueCreate(16, sizeof(Event));
-}
-
-void eventLoop() {
-    Event out;
-    if (xQueueReceive(q, &out, 0) == pdPASS) {
-        out.task.job();
-    }
 }

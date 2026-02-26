@@ -110,7 +110,7 @@ int main(void)
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
   initialize(&hspi1, &hcan1, &hi2c1, &hadc1);
-
+  vTaskStartScheduler();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -121,6 +121,23 @@ int main(void)
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  //printf("interrupts called\n");
+  if (GPIO_Pin != GPIO_PIN_6) {
+    return;
+  }
+
+  // SG_Receive_Data();
+  BaseType_t hpw = pdFALSE;
+  Event sg_e = {
+    EV_STRAIN,
+    NULL
+  };
+  xQueueSendFromISR(q, &sg_e, &hpw);
+  portYIELD_FROM_ISR(hpw);
 }
 
 /**

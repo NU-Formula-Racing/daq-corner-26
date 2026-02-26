@@ -30,7 +30,23 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_i2c_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h \
- ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_spi.h
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_spi.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
+ ../Core/Inc/corner.h \
+ ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f405xx.h \
+ ../Core/Inc/corner_can.h ../Core/Inc/can_driver.h \
+ ../Core/Inc/corner_main_struct.h ../Core/Inc/temp.h \
+ ../Core/Inc/virtual_timer.h ../Core/Inc/corner_driver.h \
+ ../DriversCustom/Ads/ads_driver.h ../DriversCustom/RTOS/rtos.h \
+ ../freertos/include/FreeRTOS.h ../Core/Inc/FreeRTOSConfig.h \
+ ../freertos/include/projdefs.h ../freertos/include/portable.h \
+ ../freertos/include/deprecated_definitions.h \
+ ../freertos/portable/GCC/ARM_CM4F/portmacro.h \
+ ../freertos/include/mpu_wrappers.h ../freertos/include/task.h \
+ ../freertos/include/list.h ../freertos/include/queue.h \
+ ../freertos/include/task.h ../freertos/include/semphr.h \
+ ../freertos/include/queue.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -64,3 +80,28 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_spi.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h:
+../Core/Inc/corner.h:
+../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f405xx.h:
+../Core/Inc/corner_can.h:
+../Core/Inc/can_driver.h:
+../Core/Inc/corner_main_struct.h:
+../Core/Inc/temp.h:
+../Core/Inc/virtual_timer.h:
+../Core/Inc/corner_driver.h:
+../DriversCustom/Ads/ads_driver.h:
+../DriversCustom/RTOS/rtos.h:
+../freertos/include/FreeRTOS.h:
+../Core/Inc/FreeRTOSConfig.h:
+../freertos/include/projdefs.h:
+../freertos/include/portable.h:
+../freertos/include/deprecated_definitions.h:
+../freertos/portable/GCC/ARM_CM4F/portmacro.h:
+../freertos/include/mpu_wrappers.h:
+../freertos/include/task.h:
+../freertos/include/list.h:
+../freertos/include/queue.h:
+../freertos/include/task.h:
+../freertos/include/semphr.h:
+../freertos/include/queue.h:

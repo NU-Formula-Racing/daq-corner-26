@@ -14,5 +14,7 @@ void sg_timer_group();
 void sus_pot_timer_group();
 void tire_temp_group();
 void print_group();
-
 void SG_Receive_Data();
+
+void initQueue();
+void eventLoop();

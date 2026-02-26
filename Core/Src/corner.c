@@ -5,6 +5,8 @@ cornerboard_ corners;
 
 void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc) {
 
+    initQueue();
+
     // Read the position of the corner board
     bool front = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_8);
     bool left = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_9);
@@ -27,6 +29,24 @@ void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan, I2C_HandleType
     VirtualTimer total_tg[6] = {tg1, tg2, tg3, tg4, tg5, tg6};
     corners.tg = InitializeTimerGroup(total_tg);
 
+    // Initialize RTOS tasks
+
+    Task sus_pot_task = {
+        &sus_pot_loop, 30, MEDIUM, "sus_pot", STACK_MEDIUM, NULL
+    };
+
+    Task print_task = {
+        &print_group, 500, MEDIUM, "print", STACK_MEDIUM, NULL
+    };
+
+    Task main_loop_task = {
+        &event_loop, 50, HIGH, "main", STACK_BIG, NULL
+    };
+
+    createTask(&sus_pot_task);
+    createTask(&print_task);
+    createTask(&main_loop_task);
+
     // Set PDWN pin to low
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
 
@@ -41,36 +61,6 @@ void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan, I2C_HandleType
 
 void tick_timers() {
     TickTimer(corners.tg);
-}
-
-void sg_timer_group() {
-    // printf("DRDY pin: %d\n", HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6));
-    // while (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6) == GPIO_PIN_SET) {}
-    // while (1) {
-    //     if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6) == GPIO_PIN_RESET) {
-    //         HAL_Delay(1);
-    //         if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6) == GPIO_PIN_RESET) {
-    //             break;
-    //         }
-    //         // printf("False DRDY trigger, waiting for next one...\n");
-    //     }
-    // }
-    // uint8_t spi_rx[4] = {0};
-    // Read_ADC_Data(corners.hspi, spi_rx);
-    
-    // // for (int i=0; i<4; i++) {
-    // //     printf("spi_rx[%d] = 0x%02X\n", i, corners.spi_rx[i]);
-    // // }
-    // int32_t raw = ((spi_rx[0] << 24) | (spi_rx[1] << 16) | spi_rx[2] << 8) >> 8;
-    // // if raw is close to zero, print
-    // // printf("Strain Gauge Raw Value: %ld\n", raw);
-    // if (raw > -1000 && raw < 1000) {
-    //     // printf("oops, raw is close to zero!\n");
-    //     // while(1);
-    // }
-    // corners.strain_gauge_data = raw;
-
-    // // printf("adc val: %ld\n", adc_val);
 }
 
 void sus_pot_timer_group() {
@@ -91,9 +81,32 @@ void print_group() {
     printf("\n\n");
 }
 
+void sus_pot_loop() {
+    Event sp_e = {
+        EV_SUSPOT,
+        sus_pot_timer_group
+    };
+    xQueueSend(q, &sp_e, 0);
+}
+
 void SG_Receive_Data() {
     uint8_t spi_rx[4] = {0};
     ADS_Transmit_Data(corners.hspi, spi_rx);
     int32_t raw = ((spi_rx[0] << 24) | (spi_rx[1] << 16) | spi_rx[2] << 8) >> 8;
     corners.strain_gauge_data = raw;
+}
+
+void initQueue() {
+    q = xQueueCreate(16, sizeof(Event));
+}
+
+void event_loop() {
+    Event out;
+    if (xQueueReceive(q, &out, 0) == pdPASS) {
+        if (out.ev_type == EV_STRAIN) {
+            SG_Receive_Data();
+        } else {
+            out.job();
+        }
+    }
 }
