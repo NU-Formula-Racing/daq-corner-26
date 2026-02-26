@@ -10,11 +10,11 @@
 
 void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc);
 void tick_timers();
-void sg_timer_group();
 void sus_pot_timer_group();
 void tire_temp_group();
 void print_group();
+void sus_pot_loop();
 void SG_Receive_Data();
 
 void initQueue();
-void eventLoop();
+void event_loop();

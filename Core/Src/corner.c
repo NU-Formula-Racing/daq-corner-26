@@ -20,7 +20,7 @@ void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan, I2C_HandleType
 
     Corner_Initialize_Can(&corners);
 
-    VirtualTimer tg1 = InitializeTimer(100000000, sg_timer_group);
+    VirtualTimer tg1 = InitializeTimer(100000000, print_group);
     VirtualTimer tg2 = InitializeTimer(30, sus_pot_timer_group);
     VirtualTimer tg3 = InitializeTimer(30, main_can_loop);
     VirtualTimer tg4 = InitializeTimer(100000000, tire_temp_group);
