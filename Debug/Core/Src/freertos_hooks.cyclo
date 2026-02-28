@@ -1,4 +1,0 @@
-../Core/Src/freertos_hooks.c:10:6:vApplicationMallocFailedHook	1
-../Core/Src/freertos_hooks.c:19:6:vApplicationStackOverflowHook	1
-../Core/Src/freertos_hooks.c:31:6:vApplicationGetIdleTaskMemory	1
-../Core/Src/freertos_hooks.c:47:6:vApplicationGetTimerTaskMemory	1

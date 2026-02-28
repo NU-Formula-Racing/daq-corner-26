@@ -1,9 +1,0 @@
-../Core/Src/corner.c:6:6:initialize	1
-../Core/Src/corner.c:62:6:tick_timers	1
-../Core/Src/corner.c:66:6:sus_pot_timer_group	1
-../Core/Src/corner.c:70:6:tire_temp_group	1
-../Core/Src/corner.c:74:6:print_group	2
-../Core/Src/corner.c:84:6:sus_pot_loop	1
-../Core/Src/corner.c:92:6:SG_Receive_Data	1
-../Core/Src/corner.c:99:6:initQueue	1
-../Core/Src/corner.c:103:6:event_loop	3

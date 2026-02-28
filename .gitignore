@@ -1,2 +1,31 @@
-.DS_Store
+# STM32CubeIDE Build Artifacts
+Debug/
+Release/
+
+# Object and Dependency files
+*.o
+*.obj
+*.d
+*.su
+*.cyclo
+
+# Binary and Executable formats
+*.elf
+*.hex
+*.bin
+*.map
+*.list
+*.axf
+
+# IDE specific files
 .settings/
+*.launch
+
+# User specific files
+.DS_Store
+Thumbs.db
+
+# Other temporary files
+*.tmp
+*.bak
+*.swp

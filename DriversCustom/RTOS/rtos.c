@@ -12,7 +12,7 @@ static void runJob(void *arg) {
 }
 
 void createTask(Task *task) {
-    BaseType_t ok = xTaskCreate(
+    xTaskCreate(
         runJob,
         task->name,
         (uint32_t) task->stackSize,

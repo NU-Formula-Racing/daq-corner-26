@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "temp.h"
 
 #define I2C_TIMEOUT 100
