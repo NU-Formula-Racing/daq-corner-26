@@ -34,7 +34,7 @@ void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan,
   corners.hadc = hadc;
 
   Corner_Initialize_Can(&corners);
-  Temp_Init(&corners.temp_sensors, hi2c);
+  Temp_Init(&corners.temp_sensors, hi2c, NULL);
 
   VirtualTimer tg1 = InitializeTimer(100000000, print_group);
   VirtualTimer tg2 = InitializeTimer(30, sus_pot_timer_group);
@@ -71,10 +71,10 @@ void sus_pot_timer_group() {
   Read_Internal_ADC_Data(corners.hadc, &corners.sus_pot_data);
 }
 
-void tire_temp_group() { Temp_ReadAll(&corners.temp_sensors); }
+void tire_temp_group() { Temp_ReadAll(&corners.temp_sensors, NULL); }
 
 void temp_loop() {
-  Temp_ReadAll(&corners.temp_sensors);
+  Temp_ReadAll(&corners.temp_sensors, NULL);
 }
 
 void print_group() {
