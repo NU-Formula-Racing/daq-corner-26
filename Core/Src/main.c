@@ -111,6 +111,11 @@ int main(void)
   /* USER CODE BEGIN 2 */
   initialize(&hspi1, &hcan1, &hi2c1, &hadc1);
   vTaskStartScheduler();
+
+  /* If the scheduler was started then the following line should never be reached. */
+  printf("ERROR: vTaskStartScheduler returned! Insufficient heap?\n");
+  fflush(stdout);
+  while (1);
   /* USER CODE END 2 */
 
   /* Infinite loop */

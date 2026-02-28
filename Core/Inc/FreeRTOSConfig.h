@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FREERTOS_CONFIG_H
+#define FREERTOS_CONFIG_H
 
 #include "stm32f4xx.h"
 
@@ -60,3 +61,10 @@
 
 /* Assert */
 #define configASSERT(x) if ((x) == 0) { taskDISABLE_INTERRUPTS(); for(;;); }
+
+/* Map FreeRTOS port interrupt handlers to CMSIS standard names */
+#define vPortSVCHandler    SVC_Handler
+#define xPortPendSVHandler PendSV_Handler
+#define xPortSysTickHandler SysTick_Handler
+
+#endif /* FREERTOS_CONFIG_H */

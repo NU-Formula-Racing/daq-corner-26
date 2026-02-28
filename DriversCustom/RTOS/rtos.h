@@ -15,11 +15,11 @@ enum TaskPriority {
     CRITICAL
 };
 
-// Stack size
+// Stack size (in words, 1 word = 4 bytes)
 enum StackSize {
-    STACK_SMALL = 128,
-    STACK_MEDIUM = 256,
-    STACK_BIG = 512
+    STACK_SMALL = 256,
+    STACK_MEDIUM = 512,
+    STACK_BIG = 1024
 };
 
 // Event type
