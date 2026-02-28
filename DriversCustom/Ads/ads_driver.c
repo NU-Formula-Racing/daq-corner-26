@@ -38,6 +38,8 @@ HAL_StatusTypeDef Read_ADS_Data(SPI_HandleTypeDef *hspi, uint8_t *spi_rx) {
 void ADS_Enable_EXTI() {
     ADS_GPIO_to_EXTI();
     __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_6);
+    // Set priority to 6 (must be >= configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY which is 5)
+    HAL_NVIC_SetPriority(EXTI9_5_IRQn, 6, 0);
     HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 }
 
