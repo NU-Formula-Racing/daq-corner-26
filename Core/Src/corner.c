@@ -4,17 +4,12 @@
 
 cornerboard_ corners;
 
-// Move Task structures to global scope to ensure their memory persists
-// when the RTOS scheduler starts and the initialize() stack is reclaimed.
-static Task sus_pot_task = {&sus_pot_loop, 30,           MEDIUM,
-                            "sus_pot",     STACK_MEDIUM, NULL};
-
-static Task print_task = {&print_group, 500,          MEDIUM,
-                          "print",      STACK_MEDIUM, NULL};
-
-static Task main_loop_task = {&event_loop, 50, HIGH, "main", STACK_BIG, NULL};
-
+// Task structures
+static Task sus_pot_task = {&sus_pot_loop, 30, MEDIUM, "sus_pot", STACK_MEDIUM, NULL};
+static Task print_task = {&print_group, 500, MEDIUM, "print", STACK_MEDIUM, NULL};
+static Task main_loop_task = {&event_loop, 50, HIGH, "main_event", STACK_BIG, NULL};
 static Task temp_task = {&temp_loop, 1000, MEDIUM, "temp", STACK_MEDIUM, NULL};
+static Task can_main_task = {&main_loop, 30, HIGH, "can_main", STACK_MEDIUM, NULL};
 
 void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan,
                 I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc) {
@@ -36,15 +31,6 @@ void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan,
   Corner_Initialize_Can(&corners);
   Temp_Init(&corners.temp_sensors, hi2c, NULL);
 
-  VirtualTimer tg1 = InitializeTimer(100000000, print_group);
-  VirtualTimer tg2 = InitializeTimer(30, sus_pot_timer_group);
-  VirtualTimer tg3 = InitializeTimer(30, main_can_loop);
-  VirtualTimer tg4 = InitializeTimer(1000, tire_temp_group);
-  VirtualTimer tg5 = InitializeTimer(500, print_group);
-  VirtualTimer tg6 = InitializeTimer(1000, temp_can_loop);
-  VirtualTimer total_tg[6] = {tg1, tg2, tg3, tg4, tg5, tg6};
-  corners.tg = InitializeTimerGroup(total_tg);
-
   // Initialize RTOS tasks
   printf("Creating RTOS tasks...\n");
   fflush(stdout);
@@ -52,6 +38,7 @@ void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan,
   createTask(&print_task);
   createTask(&main_loop_task);
   createTask(&temp_task);
+  createTask(&can_main_task);
 
   // Set PDWN pin to low
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
@@ -60,21 +47,20 @@ void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan,
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
 
   ADS_Enable_EXTI();
-  fflush(stdout);
   printf("Initialization complete. Starting scheduler...\n");
   fflush(stdout);
-}
-
-void tick_timers() { TickTimer(corners.tg); }
-
-void sus_pot_timer_group() {
-  Read_Internal_ADC_Data(corners.hadc, &corners.sus_pot_data);
 }
 
 void tire_temp_group() { Temp_ReadAll(&corners.temp_sensors, NULL); }
 
 void temp_loop() {
-  Temp_ReadAll(&corners.temp_sensors, NULL);
+  tire_temp_group();
+  temp_can_loop();
+}
+
+void main_loop() {
+  Read_Internal_ADC_Data(corners.hadc, &corners.sus_pot_data);
+  main_can_loop();
 }
 
 void print_group() {
@@ -92,7 +78,10 @@ void print_group() {
 }
 
 void sus_pot_loop() {
-  Event sp_e = {EV_SUSPOT, sus_pot_timer_group};
+  // sus_pot_loop seems redundant if main_loop already reads ADC,
+  // but keeping it if it's meant to be separate.
+  // Original sus_pot_loop sends EV_SUSPOT to event_loop.
+  Event sp_e = {EV_SUSPOT, NULL}; // NULL job because event_loop handles it via enum
   xQueueSend(q, &sp_e, 0);
 }
 
@@ -107,10 +96,11 @@ void initQueue() { q = xQueueCreate(16, sizeof(Event)); }
 
 void event_loop() {
     Event out;
-    // Wait up to 50ms for an event to prevent this task from spinning and starving others
     if (xQueueReceive(q, &out, pdMS_TO_TICKS(50)) == pdPASS) {
         if (out.ev_type == EV_STRAIN) {
             SG_Receive_Data();
+        } else if (out.ev_type == EV_SUSPOT) {
+            // Handled in main_loop now, but keeping for compatibility
         } else if (out.job != NULL) {
             out.job();
         }

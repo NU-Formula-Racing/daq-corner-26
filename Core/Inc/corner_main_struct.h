@@ -2,7 +2,6 @@
 #define CORNER_MAIN_STRUCT_H
 
 #include "temp.h"
-#include "virtual_timer.h"
 #include "stm32f4xx_hal.h"
 
 // Position of the corner broker (front, left)
@@ -27,9 +26,6 @@ typedef struct
 	// Buffers
 	int32_t strain_gauge_data;
 	uint32_t sus_pot_data;
-
-	// Timer group
-	TimerGroup *tg;
 
 	enum CornerPosition corner_pos;
 
