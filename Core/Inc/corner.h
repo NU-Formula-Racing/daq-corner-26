@@ -5,6 +5,7 @@
 #include "corner_driver.h"
 #include "ads_driver.h"
 #include "rtos.h"
+#include "temp.h"
 #include <math.h>
 #include <stdio.h>
 
@@ -12,6 +13,7 @@ void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan, I2C_HandleType
 void tick_timers();
 void sus_pot_timer_group();
 void tire_temp_group();
+void temp_loop();
 void print_group();
 void sus_pot_loop();
 void SG_Receive_Data();

@@ -14,6 +14,8 @@ static Task print_task = {&print_group, 500,          MEDIUM,
 
 static Task main_loop_task = {&event_loop, 50, HIGH, "main", STACK_BIG, NULL};
 
+static Task temp_task = {&temp_loop, 1000, MEDIUM, "temp", STACK_MEDIUM, NULL};
+
 void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan,
                 I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc) {
   printf("Initializing cornerboard...\n");
@@ -32,11 +34,12 @@ void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan,
   corners.hadc = hadc;
 
   Corner_Initialize_Can(&corners);
+  Temp_Init(&corners.temp_sensors, hi2c);
 
   VirtualTimer tg1 = InitializeTimer(100000000, print_group);
   VirtualTimer tg2 = InitializeTimer(30, sus_pot_timer_group);
   VirtualTimer tg3 = InitializeTimer(30, main_can_loop);
-  VirtualTimer tg4 = InitializeTimer(100000000, tire_temp_group);
+  VirtualTimer tg4 = InitializeTimer(1000, tire_temp_group);
   VirtualTimer tg5 = InitializeTimer(500, print_group);
   VirtualTimer tg6 = InitializeTimer(1000, temp_can_loop);
   VirtualTimer total_tg[6] = {tg1, tg2, tg3, tg4, tg5, tg6};
@@ -48,6 +51,7 @@ void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan,
   createTask(&sus_pot_task);
   createTask(&print_task);
   createTask(&main_loop_task);
+  createTask(&temp_task);
 
   // Set PDWN pin to low
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
@@ -68,6 +72,10 @@ void sus_pot_timer_group() {
 }
 
 void tire_temp_group() { Temp_ReadAll(&corners.temp_sensors); }
+
+void temp_loop() {
+  Temp_ReadAll(&corners.temp_sensors);
+}
 
 void print_group() {
   // Toggle RED LED as a heartbeat to see if tasks are firing
