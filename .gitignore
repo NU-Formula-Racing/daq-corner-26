@@ -22,7 +22,7 @@ Release/
 *.launch
 
 # User specific files
-.DS_Store
+**/.DS_Store
 Thumbs.db
 
 # Other temporary files
