@@ -1,7 +1,10 @@
 #include "corner_can.h"
 #include <math.h>
+#include <stdio.h>
+#include <string.h>
 
 corner_can_ corner_can;
+static uint16_t corner_heartbeat = 0U;
 
 void Corner_Initialize_Can(cornerboard_ *cornerboard) {
   // Store cornerboard reference
@@ -32,7 +35,7 @@ void Corner_Initialize_Can(cornerboard_ *cornerboard) {
   corner_can.TxHeaderTemperatures2_.RTR = CAN_RTR_DATA;
   corner_can.TxHeaderTemperatures2_.DLC = 8;
 
-  corner_can.TxHeaderSg_.StdId = 
+  corner_can.TxHeaderSg_.StdId =
       0x538 + (corner_can.cornerboard->corner_pos * 2);
   corner_can.TxHeaderSg_.IDE = CAN_ID_STD;
   corner_can.TxHeaderSg_.RTR = CAN_RTR_DATA;
@@ -131,33 +134,29 @@ void populateCorner_Messages(uint8_t *data) {
 }
 
 static uint16_t get_strain_gauge_error(void) {
-  // Placeholder health check: zero usually indicates sensor/link issue.
-  return (corner_can.cornerboard->strain_gauge_data == 0) ? 1U : 0U;
+  // DRDY (PA6) is pulled up; it only falls when the ADS has data ready.
+  // If the chip is not connected the EXTI interrupt never fires and the flag
+  // stays 0.
+  return (corner_can.cornerboard->strain_gauge_received == 0U) ? 1U : 0U;
 }
 
 static uint16_t get_sus_pot_error(void) {
-  // Internal ADC is 12-bit; out-of-range values indicate a bad read path.
+  // A successful 12-bit ADC read is always 0-4095.
+  // Read_Internal_ADC_Data writes 0xFFFFFFFF when HAL_ADC_PollForConversion
+  // fails, so anything > 4095 is the "conversion failed" sentinel.
   return (corner_can.cornerboard->sus_pot_data > 4095U) ? 1U : 0U;
 }
 
 static uint16_t get_tire_temp_error(void) {
-  for (int i = 0; i < TEMP_NUM_SENSORS; i++) {
-    float t = corner_can.cornerboard->temp_sensors.temps[i];
-    if (!isfinite(t) || t < -40.0f || t > 250.0f) {
-      return 1U;
-    }
-  }
-  return 0U;
+  // Temp_ReadAll sets temp_any_failed when any channel's I2C read fails
+  // (mux select failure, sensor NACK, PEC mismatch, or data-error bit set).
+  return corner_can.cornerboard->temp_any_failed ? 1U : 0U;
 }
 
-static uint16_t get_general_board_error(void) {
-  if (corner_can.cornerboard->hcan == NULL ||
-      corner_can.cornerboard->hadc == NULL ||
-      corner_can.cornerboard->hi2c == NULL ||
-      corner_can.cornerboard->hspi == NULL) {
-    return 1U;
-  }
-  return 0U;
+static uint16_t get_corner_heartbeat(void) {
+  uint16_t value = corner_heartbeat;
+  corner_heartbeat++;
+  return value;
 }
 
 void populateCorner_ErrorMessage(uint8_t *data) {
@@ -166,7 +165,7 @@ void populateCorner_ErrorMessage(uint8_t *data) {
   error_msg.fields.strain_gauge.bits.fault = get_strain_gauge_error();
   error_msg.fields.sus_pot.bits.fault = get_sus_pot_error();
   error_msg.fields.tire_temp.bits.fault = get_tire_temp_error();
-  error_msg.fields.general_board.bits.fault = get_general_board_error();
+  error_msg.fields.corner_heartbeat.raw = get_corner_heartbeat();
 
   memcpy(data, error_msg.bytes, sizeof(error_msg.bytes));
 }

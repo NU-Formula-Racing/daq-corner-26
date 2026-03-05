@@ -55,19 +55,15 @@ typedef union {
 } TireTempError_;
 
 typedef union {
-	struct {
-		uint16_t fault : 1;
-		uint16_t reserved : 15;
-	} bits;
 	uint16_t raw;
-} GeneralBoardError_;
+} CornerHeartbeat_;
 
 typedef union {
 	struct {
 		StrainGaugeError_ strain_gauge;
 		SusPotError_ sus_pot;
 		TireTempError_ tire_temp;
-		GeneralBoardError_ general_board;
+		CornerHeartbeat_ corner_heartbeat;
 	} fields;
 	uint64_t raw;
 	uint8_t bytes[8];

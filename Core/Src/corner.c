@@ -51,7 +51,9 @@ void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan,
   fflush(stdout);
 }
 
-void tire_temp_group() { Temp_ReadAll(&corners.temp_sensors, NULL); }
+void tire_temp_group() {
+  corners.temp_any_failed = (Temp_ReadAll(&corners.temp_sensors, NULL) != HAL_OK) ? 1U : 0U;
+}
 
 void temp_loop() {
   tire_temp_group();
@@ -90,6 +92,7 @@ void SG_Receive_Data() {
   ADS_Transmit_Data(corners.hspi, spi_rx);
   int32_t raw = ((spi_rx[0] << 24) | (spi_rx[1] << 16) | spi_rx[2] << 8) >> 8;
   corners.strain_gauge_data = raw;
+  corners.strain_gauge_received = 1U;
 }
 
 void initQueue() { q = xQueueCreate(16, sizeof(Event)); }
