@@ -16,6 +16,7 @@ void Read_Internal_ADC_Data(ADC_HandleTypeDef *hadc, uint32_t *adc_val) {
     *adc_val = HAL_ADC_GetValue(hadc);
     // printf("Internal ADC Value: %lu\n", *adc_val);
   } else {
+    *adc_val = 0xFFFFFFFFU; // sentinel: out-of-range for a 12-bit ADC, signals conversion failure
     printf("Failed to read internal ADC value.\n");
   }
 }

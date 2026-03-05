@@ -27,6 +27,10 @@ typedef struct
 	int32_t strain_gauge_data;
 	uint32_t sus_pot_data;
 
+	// Plug-in status flags
+	uint8_t strain_gauge_received; // 1 once DRDY fires and SPI data is read
+	uint8_t temp_any_failed;       // 1 if last Temp_ReadAll had any channel error
+
 	enum CornerPosition corner_pos;
 
 } cornerboard_;

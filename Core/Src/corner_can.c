@@ -131,23 +131,23 @@ void populateCorner_Messages(uint8_t *data) {
 }
 
 static uint16_t get_strain_gauge_error(void) {
-  // Placeholder health check: zero usually indicates sensor/link issue.
-  return (corner_can.cornerboard->strain_gauge_data == 0) ? 1U : 0U;
+  // DRDY (PA6) is pulled up; it only falls when the ADS has data ready.
+  // If the chip is not connected the EXTI interrupt never fires and the flag
+  // stays 0.
+  return (corner_can.cornerboard->strain_gauge_received == 0U) ? 1U : 0U;
 }
 
 static uint16_t get_sus_pot_error(void) {
-  // Internal ADC is 12-bit; out-of-range values indicate a bad read path.
+  // A successful 12-bit ADC read is always 0-4095.
+  // Read_Internal_ADC_Data writes 0xFFFFFFFF when HAL_ADC_PollForConversion
+  // fails, so anything > 4095 is the "conversion failed" sentinel.
   return (corner_can.cornerboard->sus_pot_data > 4095U) ? 1U : 0U;
 }
 
 static uint16_t get_tire_temp_error(void) {
-  for (int i = 0; i < TEMP_NUM_SENSORS; i++) {
-    float t = corner_can.cornerboard->temp_sensors.temps[i];
-    if (!isfinite(t) || t < -40.0f || t > 250.0f) {
-      return 1U;
-    }
-  }
-  return 0U;
+  // Temp_ReadAll sets temp_any_failed when any channel's I2C read fails
+  // (mux select failure, sensor NACK, PEC mismatch, or data-error bit set).
+  return corner_can.cornerboard->temp_any_failed ? 1U : 0U;
 }
 
 static uint16_t get_general_board_error(void) {
