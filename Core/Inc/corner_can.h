@@ -25,7 +25,53 @@ typedef struct
 
 	CAN_TxHeaderTypeDef TxHeaderSusPot_;
 	uint8_t txDataSusPot_[8];
+
+	CAN_TxHeaderTypeDef TxHeaderError_;
+	uint8_t txDataError_[8];
 } corner_can_;
+
+typedef union {
+	struct {
+		uint16_t fault : 1;
+		uint16_t reserved : 15;
+	} bits;
+	uint16_t raw;
+} StrainGaugeError_;
+
+typedef union {
+	struct {
+		uint16_t fault : 1;
+		uint16_t reserved : 15;
+	} bits;
+	uint16_t raw;
+} SusPotError_;
+
+typedef union {
+	struct {
+		uint16_t fault : 1;
+		uint16_t reserved : 15;
+	} bits;
+	uint16_t raw;
+} TireTempError_;
+
+typedef union {
+	struct {
+		uint16_t fault : 1;
+		uint16_t reserved : 15;
+	} bits;
+	uint16_t raw;
+} GeneralBoardError_;
+
+typedef union {
+	struct {
+		StrainGaugeError_ strain_gauge;
+		SusPotError_ sus_pot;
+		TireTempError_ tire_temp;
+		GeneralBoardError_ general_board;
+	} fields;
+	uint64_t raw;
+	uint8_t bytes[8];
+} CornerErrorMessage_;
 
 void Corner_Initialize_Can(cornerboard_ *cornerboard);
 
@@ -37,4 +83,4 @@ void main_can_loop();
 
 void populateCorner_TemperatureMessages(uint8_t *data, int msg_num);
 void populateCorner_Messages(uint8_t *data);
-
+void populateCorner_ErrorMessage(uint8_t *data);

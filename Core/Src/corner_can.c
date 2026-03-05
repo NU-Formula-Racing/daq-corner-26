@@ -1,4 +1,5 @@
 #include "corner_can.h"
+#include <math.h>
 
 corner_can_ corner_can;
 
@@ -36,6 +37,12 @@ void Corner_Initialize_Can(cornerboard_ *cornerboard) {
   corner_can.TxHeaderSg_.IDE = CAN_ID_STD;
   corner_can.TxHeaderSg_.RTR = CAN_RTR_DATA;
   corner_can.TxHeaderSg_.DLC = 8;
+
+  // Error status message for corner boards: 0x54_
+  corner_can.TxHeaderError_.StdId = 0x540 + corner_can.cornerboard->corner_pos;
+  corner_can.TxHeaderError_.IDE = CAN_ID_STD;
+  corner_can.TxHeaderError_.RTR = CAN_RTR_DATA;
+  corner_can.TxHeaderError_.DLC = 8;
 }
 
 uint8_t send_can_messages(CAN_HandleTypeDef *hcan,
@@ -79,6 +86,10 @@ void main_can_loop() {
   populateCorner_Messages(corner_can.txDataSg_);
   send_can_messages(corner_can.cornerboard->hcan, &corner_can.TxHeaderSg_,
                     corner_can.txDataSg_, &corner_can.TxMailBox_);
+
+  populateCorner_ErrorMessage(corner_can.txDataError_);
+  send_can_messages(corner_can.cornerboard->hcan, &corner_can.TxHeaderError_,
+                    corner_can.txDataError_, &corner_can.TxMailBox_);
 }
 
 void populateCorner_TemperatureMessages(uint8_t *data, int msg_num) {
@@ -117,4 +128,45 @@ void populateCorner_Messages(uint8_t *data) {
   populateRawMessage(&signals[4], corner_can.cornerboard->sus_pot_data & 0xFF, 8, 1, 0);
 
   encodeSignals(data, 8, signals[0], signals[1], signals[2], signals[3], signals[4], signals[5], signals[6], signals[7]);
+}
+
+static uint16_t get_strain_gauge_error(void) {
+  // Placeholder health check: zero usually indicates sensor/link issue.
+  return (corner_can.cornerboard->strain_gauge_data == 0) ? 1U : 0U;
+}
+
+static uint16_t get_sus_pot_error(void) {
+  // Internal ADC is 12-bit; out-of-range values indicate a bad read path.
+  return (corner_can.cornerboard->sus_pot_data > 4095U) ? 1U : 0U;
+}
+
+static uint16_t get_tire_temp_error(void) {
+  for (int i = 0; i < TEMP_NUM_SENSORS; i++) {
+    float t = corner_can.cornerboard->temp_sensors.temps[i];
+    if (!isfinite(t) || t < -40.0f || t > 250.0f) {
+      return 1U;
+    }
+  }
+  return 0U;
+}
+
+static uint16_t get_general_board_error(void) {
+  if (corner_can.cornerboard->hcan == NULL ||
+      corner_can.cornerboard->hadc == NULL ||
+      corner_can.cornerboard->hi2c == NULL ||
+      corner_can.cornerboard->hspi == NULL) {
+    return 1U;
+  }
+  return 0U;
+}
+
+void populateCorner_ErrorMessage(uint8_t *data) {
+  CornerErrorMessage_ error_msg = {.raw = 0};
+
+  error_msg.fields.strain_gauge.bits.fault = get_strain_gauge_error();
+  error_msg.fields.sus_pot.bits.fault = get_sus_pot_error();
+  error_msg.fields.tire_temp.bits.fault = get_tire_temp_error();
+  error_msg.fields.general_board.bits.fault = get_general_board_error();
+
+  memcpy(data, error_msg.bytes, sizeof(error_msg.bytes));
 }
