@@ -6,33 +6,32 @@
 
 // Position of the corner broker (front, left)
 enum CornerPosition {
-    BottomRight = 0, // f=0, l=0
-    BottomLeft = 1, // f=0, l=1
-    FrontRight = 2, // f=1, l=0
-    FrontLeft = 3 // f=1, l=1
+    BottomRight = 0,  // f=0, l=0
+    BottomLeft = 1,   // f=0, l=1
+    FrontRight = 2,   // f=1, l=0
+    FrontLeft = 3     // f=1, l=1
 };
 
-typedef struct
-{
-	// Temperature sensors
-	TempSensors temp_sensors;
+typedef struct {
+    // Temperature sensors
+    TempSensors temp_sensors;
 
-	// Handles
-	I2C_HandleTypeDef *hi2c;
-	CAN_HandleTypeDef *hcan;
-	SPI_HandleTypeDef *hspi;
-	ADC_HandleTypeDef *hadc;
-	
-	// Buffers
-	int32_t strain_gauge_data;
-	uint32_t sus_pot_data;
+    // Handles
+    I2C_HandleTypeDef* hi2c;
+    CAN_HandleTypeDef* hcan;
+    SPI_HandleTypeDef* hspi;
+    ADC_HandleTypeDef* hadc;
 
-	// Plug-in status flags
-	uint8_t strain_gauge_received; // 1 once DRDY fires and SPI data is read
-	uint8_t temp_any_failed;       // 1 if last Temp_ReadAll had any channel error
+    // Buffers
+    int32_t strain_gauge_data;
+    uint32_t sus_pot_data;
 
-	enum CornerPosition corner_pos;
+    // Plug-in status flags
+    uint8_t strain_gauge_received;  // 1 once DRDY fires and SPI data is read
+    uint8_t temp_any_failed;        // 1 if last Temp_ReadAll had any channel error
+
+    enum CornerPosition corner_pos;
 
 } cornerboard_;
 
-#endif // CORNER_MAIN_STRUCT_H
+#endif  // CORNER_MAIN_STRUCT_H

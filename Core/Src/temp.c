@@ -4,8 +4,8 @@
 #define I2C_TIMEOUT 100
 #define TEMP_READ_MAX_RETRIES 2
 
-static TempDiag *prepare_diag(TempDiag *diag, TempDiag *fallback, uint8_t channel) {
-    TempDiag *d = (diag != NULL) ? diag : fallback;
+static TempDiag* prepare_diag(TempDiag* diag, TempDiag* fallback, uint8_t channel) {
+    TempDiag* d = (diag != NULL) ? diag : fallback;
     d->i2c_error_flags = 0;
     d->failed_channels_mask = 0;
     d->channel = channel;
@@ -14,7 +14,7 @@ static TempDiag *prepare_diag(TempDiag *diag, TempDiag *fallback, uint8_t channe
     return d;
 }
 
-static uint8_t crc8_smbus(const uint8_t *data, uint8_t len) {
+static uint8_t crc8_smbus(const uint8_t* data, uint8_t len) {
     uint8_t crc = 0;
     for (uint8_t i = 0; i < len; i++) {
         crc ^= data[i];
@@ -30,7 +30,7 @@ static uint8_t crc8_smbus(const uint8_t *data, uint8_t len) {
 }
 
 // Select a mux channel (0-7)
-static HAL_StatusTypeDef select_mux_channel(TempSensors *ts, uint8_t channel) {
+static HAL_StatusTypeDef select_mux_channel(TempSensors* ts, uint8_t channel) {
     uint8_t data = 1 << channel;
     return HAL_I2C_Master_Transmit(ts->hi2c, TCA9548A_ADDR, &data, 1, I2C_TIMEOUT);
 }
@@ -40,14 +40,15 @@ static float raw_to_celsius(uint16_t raw) { return (raw * 0.02f) - 273.15f; }
 
 // Validate SMBus PEC for a MLX90614 read-word transaction on TOBJ1
 // buf is the 3-byte response: [data_lsb, data_msb, pec]
-static int mlx90614_pec_ok(const uint8_t *buf) {
-    uint8_t pec_data[5] = {MLX90614_ADDR, MLX90614_REG_TOBJ1, (uint8_t)(MLX90614_ADDR | 0x01U), buf[0], buf[1]};
+static int mlx90614_pec_ok(const uint8_t* buf) {
+    uint8_t pec_data[5] = {MLX90614_ADDR, MLX90614_REG_TOBJ1, (uint8_t)(MLX90614_ADDR | 0x01U),
+                           buf[0], buf[1]};
     return crc8_smbus(pec_data, 5) == buf[2];
 }
 
-HAL_StatusTypeDef Temp_Init(TempSensors *ts, I2C_HandleTypeDef *hi2c, TempDiag *diag) {
+HAL_StatusTypeDef Temp_Init(TempSensors* ts, I2C_HandleTypeDef* hi2c, TempDiag* diag) {
     TempDiag dummy_diag = {0};
-    TempDiag *d = prepare_diag(diag, &dummy_diag, TEMP_INVALID_CHANNEL);
+    TempDiag* d = prepare_diag(diag, &dummy_diag, TEMP_INVALID_CHANNEL);
 
     HAL_StatusTypeDef status;
 
@@ -65,9 +66,9 @@ HAL_StatusTypeDef Temp_Init(TempSensors *ts, I2C_HandleTypeDef *hi2c, TempDiag *
     return status;
 }
 
-HAL_StatusTypeDef Temp_ReadOne(TempSensors *ts, uint8_t channel, float *temp_c, TempDiag *diag) {
+HAL_StatusTypeDef Temp_ReadOne(TempSensors* ts, uint8_t channel, float* temp_c, TempDiag* diag) {
     TempDiag dummy_diag = {0};
-    TempDiag *d = prepare_diag(diag, &dummy_diag, channel);
+    TempDiag* d = prepare_diag(diag, &dummy_diag, channel);
     if (channel >= TEMP_NUM_SENSORS) {
         d->failed_channels_mask = 0;
         d->channel = channel;
@@ -93,8 +94,8 @@ HAL_StatusTypeDef Temp_ReadOne(TempSensors *ts, uint8_t channel, float *temp_c, 
             continue;
         }
 
-        status =
-            HAL_I2C_Mem_Read(ts->hi2c, MLX90614_ADDR, MLX90614_REG_TOBJ1, I2C_MEMADD_SIZE_8BIT, buf, 3, I2C_TIMEOUT);
+        status = HAL_I2C_Mem_Read(ts->hi2c, MLX90614_ADDR, MLX90614_REG_TOBJ1, I2C_MEMADD_SIZE_8BIT,
+                                  buf, 3, I2C_TIMEOUT);
         if (status != HAL_OK) {
             last_status = status;
             last_step = TEMP_DIAG_STEP_SENSOR_READ;
@@ -128,27 +129,27 @@ HAL_StatusTypeDef Temp_ReadOne(TempSensors *ts, uint8_t channel, float *temp_c, 
     d->step = last_step;
     d->i2c_error_flags = error_flags_accum;
     switch (last_step) {
-    case TEMP_DIAG_STEP_MUX_SELECT:
-        printf("Failed to select mux channel %d\n", channel);
-        break;
-    case TEMP_DIAG_STEP_SENSOR_READ:
-        printf("Failed to read temp sensor %d\n", channel);
-        break;
-    case TEMP_DIAG_STEP_PEC_MISMATCH:
-        printf("PEC mismatch on temp sensor %d\n", channel);
-        break;
-    case TEMP_DIAG_STEP_SENSOR_DATA_ERROR:
-        printf("MLX90614 data error on sensor %d\n", channel);
-        break;
-    default:
-        break;
+        case TEMP_DIAG_STEP_MUX_SELECT:
+            printf("Failed to select mux channel %d\n", channel);
+            break;
+        case TEMP_DIAG_STEP_SENSOR_READ:
+            printf("Failed to read temp sensor %d\n", channel);
+            break;
+        case TEMP_DIAG_STEP_PEC_MISMATCH:
+            printf("PEC mismatch on temp sensor %d\n", channel);
+            break;
+        case TEMP_DIAG_STEP_SENSOR_DATA_ERROR:
+            printf("MLX90614 data error on sensor %d\n", channel);
+            break;
+        default:
+            break;
     }
     return last_status;
 }
 
-HAL_StatusTypeDef Temp_ReadAll(TempSensors *ts, TempDiag *diag) {
+HAL_StatusTypeDef Temp_ReadAll(TempSensors* ts, TempDiag* diag) {
     TempDiag dummy_diag = {0};
-    TempDiag *d = prepare_diag(diag, &dummy_diag, TEMP_INVALID_CHANNEL);
+    TempDiag* d = prepare_diag(diag, &dummy_diag, TEMP_INVALID_CHANNEL);
     HAL_StatusTypeDef status;
     HAL_StatusTypeDef first_error_status = HAL_OK;
     uint8_t has_error = 0;
