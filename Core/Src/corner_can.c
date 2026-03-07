@@ -138,7 +138,7 @@ static uint16_t get_sus_pot_error(void) {
     // A successful 12-bit ADC read is always 0-4095.
     // Read_Internal_ADC_Data writes 0xFFFFFFFF when HAL_ADC_PollForConversion
     // fails, so anything > 4095 is the "conversion failed" sentinel.
-    return (corner_can.cornerboard->sus_pot_data > 4095U) ? 1U : 0U;
+    return (corner_can.cornerboard->sus_pot_data > 4085U || corner_can.cornerboard->sus_pot_data < 10U) ? 1U : 0U;
 }
 
 static uint16_t get_tire_temp_error(void) {
