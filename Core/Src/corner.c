@@ -92,7 +92,7 @@ void SG_Receive_Data() {
     ADS_Transmit_Data(corners.hspi, spi_rx);
     int32_t raw = ((spi_rx[0] << 24) | (spi_rx[1] << 16) | spi_rx[2] << 8) >> 8;
     corners.strain_gauge_data = raw;
-    corners.strain_gauge_received = (raw >= 0x7FFFFF) ? 1U : 0u;
+    corners.strain_gauge_received = (raw >= 0x7FFFFF) ? 1U : 0U;
 }
 
 void initQueue() { q = xQueueCreate(16, sizeof(Event)); }
