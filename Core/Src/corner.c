@@ -52,10 +52,6 @@ void initialize(SPI_HandleTypeDef* hspi, CAN_HandleTypeDef* hcan, I2C_HandleType
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, ((int)(corners.corner_pos) & 1) ? GPIO_PIN_SET : GPIO_PIN_RESET); // front led
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, ((int)(corners.corner_pos) >> 1 & 1) ? GPIO_PIN_SET : GPIO_PIN_RESET); // left led
 
-  // set the LEDs to indicate corner position
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, ((int)(corners.corner_pos) & 1) ? GPIO_PIN_SET : GPIO_PIN_RESET); // front led
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, ((int)(corners.corner_pos) >> 1 & 1) ? GPIO_PIN_SET : GPIO_PIN_RESET); // left led
-
   ADS_Enable_EXTI();
   printf("Initialization complete. Starting scheduler...\n");
   fflush(stdout);
