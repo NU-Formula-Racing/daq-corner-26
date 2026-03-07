@@ -3,8 +3,8 @@
 
 QueueHandle_t q = NULL;
 
-static void runJob(void *arg) {
-    Task *t = (Task*)arg;
+static void runJob(void* arg) {
+    Task* t = (Task*)arg;
     if (t == NULL || t->job == NULL) {
         printf("Task started with NULL job! Suspending.\n");
         fflush(stdout);
@@ -19,17 +19,11 @@ static void runJob(void *arg) {
     }
 }
 
-void createTask(Task *task) {
+void createTask(Task* task) {
     printf("Creating task: %s\n", task->name);
     fflush(stdout);
-    BaseType_t status = xTaskCreate(
-        runJob,
-        task->name,
-        (uint32_t) task->stackSize,
-        (void *) task,
-        task->priority,
-        &task->h
-    );
+    BaseType_t status = xTaskCreate(runJob, task->name, (uint32_t)task->stackSize, (void*)task,
+                                    task->priority, &task->h);
 
     if (status != pdPASS) {
         printf("FAILED to create task %s\n", task->name);

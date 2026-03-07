@@ -9,7 +9,8 @@
 #include <math.h>
 #include <stdio.h>
 
-void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc);
+void initialize(SPI_HandleTypeDef* hspi, CAN_HandleTypeDef* hcan, I2C_HandleTypeDef* hi2c,
+                ADC_HandleTypeDef* hadc);
 void tire_temp_group();
 void temp_loop();
 void print_group();

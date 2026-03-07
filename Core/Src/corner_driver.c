@@ -1,21 +1,23 @@
 #include "corner_driver.h"
 
-void Read_ADC_Data(SPI_HandleTypeDef *hspi, uint8_t *spi_rx) {
-  uint8_t spi_tx[4] = {0};
-  HAL_SPI_TransmitReceive(hspi, spi_tx, spi_rx, 3, 100);
-  // printf("SPI Transaction Status %d\n", t);
-  // if (HAL_SPI_TransmitReceive(hspi, spi_tx, spi_rx, 3, 100) != HAL_OK) {
-  //     // Error
-  //     printf("ERROR\n");
-  // }
+void Read_ADC_Data(SPI_HandleTypeDef* hspi, uint8_t* spi_rx) {
+    uint8_t spi_tx[4] = {0};
+    HAL_SPI_TransmitReceive(hspi, spi_tx, spi_rx, 3, 100);
+    // printf("SPI Transaction Status %d\n", t);
+    // if (HAL_SPI_TransmitReceive(hspi, spi_tx, spi_rx, 3, 100) != HAL_OK) {
+    //     // Error
+    //     printf("ERROR\n");
+    // }
 }
 
-void Read_Internal_ADC_Data(ADC_HandleTypeDef *hadc, uint32_t *adc_val) {
-  HAL_ADC_Start(hadc);
-  if (HAL_ADC_PollForConversion(hadc, 100) == HAL_OK) {
-    *adc_val = HAL_ADC_GetValue(hadc);
-    // printf("Internal ADC Value: %lu\n", *adc_val);
-  } else {
-    printf("Failed to read internal ADC value.\n");
-  }
+void Read_Internal_ADC_Data(ADC_HandleTypeDef* hadc, uint32_t* adc_val) {
+    HAL_ADC_Start(hadc);
+    if (HAL_ADC_PollForConversion(hadc, 100) == HAL_OK) {
+        *adc_val = HAL_ADC_GetValue(hadc);
+        // printf("Internal ADC Value: %lu\n", *adc_val);
+    } else {
+        *adc_val =
+            0xFFFFFFFFU;  // sentinel: out-of-range for a 12-bit ADC, signals conversion failure
+        printf("Failed to read internal ADC value.\n");
+    }
 }
