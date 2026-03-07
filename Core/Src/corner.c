@@ -9,6 +9,7 @@ static Task sus_pot_task = {&sus_pot_loop, 30, MEDIUM, "sus_pot", STACK_MEDIUM, 
 static Task print_task = {&print_group, 500, MEDIUM, "print", STACK_MEDIUM, NULL};
 static Task main_loop_task = {&event_loop, 50, HIGH, "main_event", STACK_BIG, NULL};
 static Task temp_task = {&temp_loop, 1000, MEDIUM, "temp", STACK_MEDIUM, NULL};
+static Task can_error_task = {&error_can_loop, 1000, MEDIUM, "can_error", STACK_MEDIUM, NULL};
 static Task can_main_task = {&main_loop, 30, HIGH, "can_main", STACK_MEDIUM, NULL};
 
 void initialize(SPI_HandleTypeDef* hspi, CAN_HandleTypeDef* hcan, I2C_HandleTypeDef* hi2c,
@@ -38,6 +39,7 @@ void initialize(SPI_HandleTypeDef* hspi, CAN_HandleTypeDef* hcan, I2C_HandleType
     createTask(&print_task);
     createTask(&main_loop_task);
     createTask(&temp_task);
+    createTask(&can_error_task);
     createTask(&can_main_task);
 
     // Set PDWN pin to low

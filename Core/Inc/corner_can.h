@@ -76,6 +76,7 @@ uint8_t send_can_messages(CAN_HandleTypeDef* hcan, CAN_TxHeaderTypeDef* TxHeader
 // CAN Loop
 void temp_can_loop();
 void main_can_loop();
+void error_can_loop();
 
 void populateCorner_TemperatureMessages(uint8_t* data, int msg_num);
 void populateCorner_Messages(uint8_t* data);

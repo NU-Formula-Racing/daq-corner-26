@@ -80,7 +80,9 @@ void main_can_loop() {
     populateCorner_Messages(corner_can.txDataSg_);
     send_can_messages(corner_can.cornerboard->hcan, &corner_can.TxHeaderSg_, corner_can.txDataSg_,
                       &corner_can.TxMailBox_);
+}
 
+void error_can_loop() {
     populateCorner_ErrorMessage(corner_can.txDataError_);
     send_can_messages(corner_can.cornerboard->hcan, &corner_can.TxHeaderError_,
                       corner_can.txDataError_, &corner_can.TxMailBox_);
@@ -138,7 +140,10 @@ static uint16_t get_sus_pot_error(void) {
     // A successful 12-bit ADC read is always 0-4095.
     // Read_Internal_ADC_Data writes 0xFFFFFFFF when HAL_ADC_PollForConversion
     // fails, so anything > 4095 is the "conversion failed" sentinel.
-    return (corner_can.cornerboard->sus_pot_data > 4085U || corner_can.cornerboard->sus_pot_data < 10U) ? 1U : 0U;
+    return (corner_can.cornerboard->sus_pot_data > 4085U ||
+            corner_can.cornerboard->sus_pot_data < 10U)
+               ? 1U
+               : 0U;
 }
 
 static uint16_t get_tire_temp_error(void) {
