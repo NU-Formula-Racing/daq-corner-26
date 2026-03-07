@@ -4,37 +4,80 @@
 #include "corner_main_struct.h"
 #include "stm32f4xx_hal.h"
 
-typedef struct
-{
-	cornerboard_ *cornerboard;
+typedef struct {
+    cornerboard_* cornerboard;
 
-	uint32_t TxMailBox_;
+    uint32_t TxMailBox_;
 
-	CAN_RxHeaderTypeDef RxHeader_;
-	uint8_t rxData_[8];
+    CAN_RxHeaderTypeDef RxHeader_;
+    uint8_t rxData_[8];
 
-	// Temperature CAN messages (2 messages, 4 temps each)
-	CAN_TxHeaderTypeDef TxHeaderTemperatures1_;  // First 4 temps
-	uint8_t txDataTemperatures1_[8];
+    // Temperature CAN messages (2 messages, 4 temps each)
+    CAN_TxHeaderTypeDef TxHeaderTemperatures1_;  // First 4 temps
+    uint8_t txDataTemperatures1_[8];
 
-	CAN_TxHeaderTypeDef TxHeaderTemperatures2_;  // Last 4 temps
-	uint8_t txDataTemperatures2_[8];
+    CAN_TxHeaderTypeDef TxHeaderTemperatures2_;  // Last 4 temps
+    uint8_t txDataTemperatures2_[8];
 
-	CAN_TxHeaderTypeDef TxHeaderSg_;
-	uint8_t txDataSg_[8];
+    CAN_TxHeaderTypeDef TxHeaderSg_;
+    uint8_t txDataSg_[8];
 
-	CAN_TxHeaderTypeDef TxHeaderSusPot_;
-	uint8_t txDataSusPot_[8];
+    CAN_TxHeaderTypeDef TxHeaderSusPot_;
+    uint8_t txDataSusPot_[8];
+
+    CAN_TxHeaderTypeDef TxHeaderError_;
+    uint8_t txDataError_[8];
 } corner_can_;
 
-void Corner_Initialize_Can(cornerboard_ *cornerboard);
+typedef union {
+    struct {
+        uint16_t fault : 1;
+        uint16_t reserved : 15;
+    } bits;
+    uint16_t raw;
+} StrainGaugeError_;
 
-uint8_t send_can_messages(CAN_HandleTypeDef *hcan, CAN_TxHeaderTypeDef *TxHeader, uint8_t *data, uint32_t *TxMailBox);
+typedef union {
+    struct {
+        uint16_t fault : 1;
+        uint16_t reserved : 15;
+    } bits;
+    uint16_t raw;
+} SusPotError_;
+
+typedef union {
+    struct {
+        uint16_t fault : 1;
+        uint16_t reserved : 15;
+    } bits;
+    uint16_t raw;
+} TireTempError_;
+
+typedef union {
+    uint16_t raw;
+} CornerHeartbeat_;
+
+typedef union {
+    struct {
+        StrainGaugeError_ strain_gauge;
+        SusPotError_ sus_pot;
+        TireTempError_ tire_temp;
+        CornerHeartbeat_ corner_heartbeat;
+    } fields;
+    uint64_t raw;
+    uint8_t bytes[8];
+} CornerErrorMessage_;
+
+void Corner_Initialize_Can(cornerboard_* cornerboard);
+
+uint8_t send_can_messages(CAN_HandleTypeDef* hcan, CAN_TxHeaderTypeDef* TxHeader, uint8_t* data,
+                          uint32_t* TxMailBox);
 
 // CAN Loop
 void temp_can_loop();
 void main_can_loop();
+void error_can_loop();
 
-void populateCorner_TemperatureMessages(uint8_t *data, int msg_num);
-void populateCorner_Messages(uint8_t *data);
-
+void populateCorner_TemperatureMessages(uint8_t* data, int msg_num);
+void populateCorner_Messages(uint8_t* data);
+void populateCorner_ErrorMessage(uint8_t* data);

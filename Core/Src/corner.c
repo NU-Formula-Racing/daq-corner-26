@@ -1,9 +1,22 @@
 #include "corner.h"
 #include <stdbool.h>
+#include <stdio.h>
 
 cornerboard_ corners;
 
-void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc) {
+// Task structures
+static Task sus_pot_task = {&sus_pot_loop, 30, MEDIUM, "sus_pot", STACK_MEDIUM, NULL};
+static Task print_task = {&print_group, 500, MEDIUM, "print", STACK_MEDIUM, NULL};
+static Task main_loop_task = {&event_loop, 50, HIGH, "main_event", STACK_BIG, NULL};
+static Task temp_task = {&temp_loop, 1000, MEDIUM, "temp", STACK_MEDIUM, NULL};
+static Task can_error_task = {&error_can_loop, 1000, MEDIUM, "can_error", STACK_MEDIUM, NULL};
+static Task can_main_task = {&main_loop, 30, HIGH, "can_main", STACK_MEDIUM, NULL};
+
+void initialize(SPI_HandleTypeDef* hspi, CAN_HandleTypeDef* hcan, I2C_HandleTypeDef* hi2c,
+                ADC_HandleTypeDef* hadc) {
+    printf("Initializing cornerboard...\n");
+    fflush(stdout);
+    initQueue();
 
     // Read the position of the corner board
     bool front = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_8);
@@ -17,74 +30,84 @@ void initialize(SPI_HandleTypeDef *hspi, CAN_HandleTypeDef *hcan, I2C_HandleType
     corners.hadc = hadc;
 
     Corner_Initialize_Can(&corners);
+    Temp_Init(&corners.temp_sensors, hi2c, NULL);
 
-    VirtualTimer tg1 = InitializeTimer(30, sg_timer_group);
-    VirtualTimer tg2 = InitializeTimer(30, sus_pot_timer_group);
-    VirtualTimer tg3 = InitializeTimer(30, main_can_loop);
-    VirtualTimer tg4 = InitializeTimer(1000, tire_temp_group);
-    VirtualTimer tg5 = InitializeTimer(500, print_group);
-    VirtualTimer tg6 = InitializeTimer(1000, temp_can_loop);
-    VirtualTimer total_tg[6] = {tg1, tg2, tg3, tg4, tg5, tg6};
-    corners.tg = InitializeTimerGroup(total_tg);
+    // Initialize RTOS tasks
+    printf("Creating RTOS tasks...\n");
+    fflush(stdout);
+    createTask(&sus_pot_task);
+    createTask(&print_task);
+    createTask(&main_loop_task);
+    createTask(&temp_task);
+    createTask(&can_error_task);
+    createTask(&can_main_task);
 
     // Set PDWN pin to low
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
 
-    if (Temp_Init(&corners.temp_sensors, corners.hi2c) != HAL_OK) {
-        printf("Failed to initialize temperature sensors\n");
-    } else {
-        printf("Temperature sensors initialized successfully\n");
-    }
-}
+    // set red LED to on to indicate initialization is happening
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
 
-void tick_timers() {
-    TickTimer(corners.tg);
-}
-
-void sg_timer_group() {
-    // printf("DRDY pin: %d\n", HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6));
-    // while (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6) == GPIO_PIN_SET) {}
-    while (1) {
-        if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6) == GPIO_PIN_RESET) {
-            HAL_Delay(1);
-            if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6) == GPIO_PIN_RESET) {
-                break;
-            }
-            // printf("False DRDY trigger, waiting for next one...\n");
-        }
-    }
-    uint8_t spi_rx[4] = {0};
-    Read_ADC_Data(corners.hspi, spi_rx);
-    
-    // for (int i=0; i<4; i++) {
-    //     printf("spi_rx[%d] = 0x%02X\n", i, corners.spi_rx[i]);
-    // }
-    int32_t raw = ((spi_rx[0] << 24) | (spi_rx[1] << 16) | spi_rx[2] << 8) >> 8;
-    // if raw is close to zero, print
-    // printf("Strain Gauge Raw Value: %ld\n", raw);
-    if (raw > -1000 && raw < 1000) {
-        // printf("oops, raw is close to zero!\n");
-        // while(1);
-    }
-    corners.strain_gauge_data = raw;
-
-    // printf("adc val: %ld\n", adc_val);
-}
-
-void sus_pot_timer_group() {
-    Read_Internal_ADC_Data(corners.hadc, &corners.sus_pot_data);
+    ADS_Enable_EXTI();
+    printf("Initialization complete. Starting scheduler...\n");
+    fflush(stdout);
 }
 
 void tire_temp_group() {
-    Temp_ReadAll(&corners.temp_sensors);
+    corners.temp_any_failed = (Temp_ReadAll(&corners.temp_sensors, NULL) != HAL_OK) ? 1U : 0U;
+}
+
+void temp_loop() {
+    tire_temp_group();
+    temp_can_loop();
+}
+
+void main_loop() {
+    Read_Internal_ADC_Data(corners.hadc, &corners.sus_pot_data);
+    main_can_loop();
 }
 
 void print_group() {
-    printf("Corner Position: %d\n", corners.corner_pos);
+    // Toggle RED LED as a heartbeat to see if tasks are firing
+    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+
+    printf("--- Heartbeat --- Corner Position: %d\n", corners.corner_pos);
     printf("Strain Gauge Reading: %ld\n", corners.strain_gauge_data);
     printf("Suspension Potentiometer ADC Value: %ld\n", corners.sus_pot_data);
     for (int i = 0; i < TEMP_NUM_SENSORS; i++) {
         printf("Temp Sensor %d: %d C\n", i, (int)corners.temp_sensors.temps[i]);
     }
     printf("\n\n");
+    fflush(stdout);
+}
+
+void sus_pot_loop() {
+    // sus_pot_loop seems redundant if main_loop already reads ADC,
+    // but keeping it if it's meant to be separate.
+    // Original sus_pot_loop sends EV_SUSPOT to event_loop.
+    Event sp_e = {EV_SUSPOT, NULL};  // NULL job because event_loop handles it via enum
+    xQueueSend(q, &sp_e, 0);
+}
+
+void SG_Receive_Data() {
+    uint8_t spi_rx[4] = {0};
+    ADS_Transmit_Data(corners.hspi, spi_rx);
+    int32_t raw = ((spi_rx[0] << 24) | (spi_rx[1] << 16) | spi_rx[2] << 8) >> 8;
+    corners.strain_gauge_data = raw;
+    corners.strain_gauge_received = (raw >= 0x7FFFFF) ? 0U : 1U;
+}
+
+void initQueue() { q = xQueueCreate(16, sizeof(Event)); }
+
+void event_loop() {
+    Event out;
+    if (xQueueReceive(q, &out, pdMS_TO_TICKS(50)) == pdPASS) {
+        if (out.ev_type == EV_STRAIN) {
+            SG_Receive_Data();
+        } else if (out.ev_type == EV_SUSPOT) {
+            // Handled in main_loop now, but keeping for compatibility
+        } else if (out.job != NULL) {
+            out.job();
+        }
+    }
 }
