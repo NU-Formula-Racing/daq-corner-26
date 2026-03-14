@@ -30,7 +30,12 @@ void initialize(SPI_HandleTypeDef* hspi, CAN_HandleTypeDef* hcan, I2C_HandleType
     corners.hadc = hadc;
 
     Corner_Initialize_Can(&corners);
-    Temp_Init(&corners.temp_sensors, hi2c, NULL);
+    HAL_StatusTypeDef status = Temp_Init(&corners.temp_sensors, hi2c, NULL);
+    if (status != HAL_OK) {
+        printf("Failed to initialize temperature sensors! Status: %d\n", status);
+    } else {
+        printf("Temperature sensors initialized successfully.\n");
+    }
 
     // Initialize RTOS tasks
     printf("Creating RTOS tasks...\n");
@@ -45,16 +50,19 @@ void initialize(SPI_HandleTypeDef* hspi, CAN_HandleTypeDef* hcan, I2C_HandleType
     // Set PDWN pin to low
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
 
-  // set red LED to on to indicate initialization is happening
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
+    // set red LED to on to indicate initialization is happening
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
 
-  // set the LEDs to indicate corner position
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, ((int)(corners.corner_pos) & 1) ? GPIO_PIN_SET : GPIO_PIN_RESET); // left led
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, ((int)(corners.corner_pos) >> 1 & 1) ? GPIO_PIN_SET : GPIO_PIN_RESET); // front led
+    // set the LEDs to indicate corner position
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5,
+                      ((int)(corners.corner_pos) & 1) ? GPIO_PIN_SET : GPIO_PIN_RESET);  // left led
+    HAL_GPIO_WritePin(
+        GPIOC, GPIO_PIN_4,
+        ((int)(corners.corner_pos) >> 1 & 1) ? GPIO_PIN_SET : GPIO_PIN_RESET);  // front led
 
-  ADS_Enable_EXTI();
-  printf("Initialization complete. Starting scheduler...\n");
-  fflush(stdout);
+    ADS_Enable_EXTI();
+    printf("Initialization complete. Starting scheduler...\n");
+    fflush(stdout);
 }
 
 void tire_temp_group() {

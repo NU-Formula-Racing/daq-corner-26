@@ -21,6 +21,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "FreeRTOS.h"
+#include "semphr.h"
+#include "task.h"
 
 /* USER CODE END Includes */
 
@@ -49,7 +52,7 @@ I2C_HandleTypeDef hi2c1;
 SPI_HandleTypeDef hspi1;
 
 /* USER CODE BEGIN PV */
-
+static SemaphoreHandle_t printf_mutex = NULL;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -66,13 +69,23 @@ static void MX_ADC1_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 int _write(int file, char* ptr, int len) {
+    BaseType_t is_scheduler_running = (xTaskGetSchedulerState() == taskSCHEDULER_RUNNING);
+    
+    if (printf_mutex != NULL && is_scheduler_running) {
+        xSemaphoreTake(printf_mutex, portMAX_DELAY);
+    }
+
     int DataIdx;
     for (DataIdx = 0; DataIdx < len; DataIdx++) {
         ITM_SendChar(*ptr++);
     }
+
+    if (printf_mutex != NULL && is_scheduler_running) {
+        xSemaphoreGive(printf_mutex);
+    }
+    
     return len;
 }
-
 /* USER CODE END 0 */
 
 /**
@@ -107,6 +120,7 @@ int main(void) {
     MX_CAN1_Init();
     MX_ADC1_Init();
     /* USER CODE BEGIN 2 */
+    printf_mutex = xSemaphoreCreateMutex();
     initialize(&hspi1, &hcan1, &hi2c1, &hadc1);
     vTaskStartScheduler();
 
