@@ -79,5 +79,6 @@ void main_can_loop();
 void error_can_loop();
 
 void populateCorner_TemperatureMessages(uint8_t* data, int msg_num);
-void populateCorner_Messages(uint8_t* data);
+void populate_Sg_Message(uint8_t* data);
+void populate_SusPot_Message(uint8_t* data);
 void populateCorner_ErrorMessage(uint8_t* data);

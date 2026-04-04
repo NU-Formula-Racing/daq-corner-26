@@ -36,6 +36,11 @@ void Corner_Initialize_Can(cornerboard_* cornerboard) {
     corner_can.TxHeaderSg_.RTR = CAN_RTR_DATA;
     corner_can.TxHeaderSg_.DLC = 8;
 
+    corner_can.TxHeaderSusPot_.StdId = 0x539 + (corner_can.cornerboard->corner_pos * 2);
+    corner_can.TxHeaderSusPot_.IDE = CAN_ID_STD;
+    corner_can.TxHeaderSusPot_.RTR = CAN_RTR_DATA;
+    corner_can.TxHeaderSusPot_.DLC = 4;
+
     // Error status message for corner boards: 0x54_
     corner_can.TxHeaderError_.StdId = 0x540 + corner_can.cornerboard->corner_pos;
     corner_can.TxHeaderError_.IDE = CAN_ID_STD;
@@ -77,8 +82,12 @@ void temp_can_loop() {
 }
 
 void main_can_loop() {
-    populateCorner_Messages(corner_can.txDataSg_);
+    populate_Sg_Message(corner_can.txDataSg_);
     send_can_messages(corner_can.cornerboard->hcan, &corner_can.TxHeaderSg_, corner_can.txDataSg_,
+                      &corner_can.TxMailBox_);
+
+    populate_SusPot_Message(corner_can.txDataSusPot_);
+    send_can_messages(corner_can.cornerboard->hcan, &corner_can.TxHeaderSusPot_, corner_can.txDataSusPot_,
                       &corner_can.TxMailBox_);
 }
 
@@ -103,30 +112,38 @@ void populateCorner_TemperatureMessages(uint8_t* data, int msg_num) {
     encodeSignals(data, 4, signals[0], signals[1], signals[2], signals[3]);
 }
 
-void populateCorner_Messages(uint8_t* data) {
+void populate_Sg_Message(uint8_t* data) {
     RawCanSignal signals[8];
 
-    // for (int i = 0; i < 2; i++) {
-    //   populateRawMessage(&signals[i], corner_can.cornerboard->spi_rx[i], 8, 1, 0);
-    // }
-
     // send each byte of sg data as a signal in little endian order
-    populateRawMessage(&signals[3], (corner_can.cornerboard->strain_gauge_data >> 24) & 0xFF, 8, 1,
-                       0);
-    populateRawMessage(&signals[2], (corner_can.cornerboard->strain_gauge_data >> 16) & 0xFF, 8, 1,
-                       0);
-    populateRawMessage(&signals[1], (corner_can.cornerboard->strain_gauge_data >> 8) & 0xFF, 8, 1,
-                       0);
+    populateRawMessage(&signals[3], (corner_can.cornerboard->strain_gauge_data >> 24) & 0xFF, 8, 1, 0);
+    populateRawMessage(&signals[2], (corner_can.cornerboard->strain_gauge_data >> 16) & 0xFF, 8, 1, 0);
+    populateRawMessage(&signals[1], (corner_can.cornerboard->strain_gauge_data >> 8) & 0xFF, 8, 1, 0);
     populateRawMessage(&signals[0], corner_can.cornerboard->strain_gauge_data & 0xFF, 8, 1, 0);
 
-    // send each byte of suspension potentiometer data as a signal in big endian order
-    populateRawMessage(&signals[7], (corner_can.cornerboard->sus_pot_data >> 24) & 0xFF, 8, 1, 0);
-    populateRawMessage(&signals[6], (corner_can.cornerboard->sus_pot_data >> 16) & 0xFF, 8, 1, 0);
-    populateRawMessage(&signals[5], (corner_can.cornerboard->sus_pot_data >> 8) & 0xFF, 8, 1, 0);
-    populateRawMessage(&signals[4], corner_can.cornerboard->sus_pot_data & 0xFF, 8, 1, 0);
+    // send each byte of strain_gauge_newtons (float)
+    uint32_t sg_newtons_bytes;
+    memcpy(&sg_newtons_bytes, &corner_can.cornerboard->strain_gauge_newtons, sizeof(float));
+
+    populateRawMessage(&signals[7], (sg_newtons_bytes >> 24) & 0xFF, 8, 1, 0);
+    populateRawMessage(&signals[6], (sg_newtons_bytes >> 16) & 0xFF, 8, 1, 0);
+    populateRawMessage(&signals[5], (sg_newtons_bytes >> 8) & 0xFF, 8, 1, 0);
+    populateRawMessage(&signals[4], sg_newtons_bytes & 0xFF, 8, 1, 0);
 
     encodeSignals(data, 8, signals[0], signals[1], signals[2], signals[3], signals[4], signals[5],
                   signals[6], signals[7]);
+}
+
+void populate_SusPot_Message(uint8_t* data) {
+    RawCanSignal signals[4];
+
+    // send each byte of suspension potentiometer data as a signal in big endian order
+    populateRawMessage(&signals[3], (corner_can.cornerboard->sus_pot_data >> 24) & 0xFF, 8, 1, 0);
+    populateRawMessage(&signals[2], (corner_can.cornerboard->sus_pot_data >> 16) & 0xFF, 8, 1, 0);
+    populateRawMessage(&signals[1], (corner_can.cornerboard->sus_pot_data >> 8) & 0xFF, 8, 1, 0);
+    populateRawMessage(&signals[0], corner_can.cornerboard->sus_pot_data & 0xFF, 8, 1, 0);
+
+    encodeSignals(data, 4, signals[0], signals[1], signals[2], signals[3]);
 }
 
 static uint16_t get_strain_gauge_error(void) {

@@ -139,6 +139,7 @@ void main_loop() {
 void print_group() {
     printf("--- Heartbeat --- Corner Position: %d\n", corners.corner_pos);
     printf("Strain Gauge Reading: %ld\n", corners.strain_gauge_data);
+    printf("Strain Gauge Force: %.2f N\n", corners.strain_gauge_newtons);
     printf("Suspension Potentiometer ADC Value: %ld\n", corners.sus_pot_data);
     for (int i = 0; i < TEMP_NUM_SENSORS; i++) {
         printf("Temp Sensor %d: %d C\n", i, (int)corners.temp_sensors.temps[i]);
@@ -161,6 +162,40 @@ void SG_Receive_Data() {
     int32_t raw = ((spi_rx[0] << 24) | (spi_rx[1] << 16) | spi_rx[2] << 8) >> 8;
     corners.strain_gauge_data = raw;
     corners.strain_gauge_received = (raw >= 0x7FFFFF) ? 0U : 1U;
+
+#if ENABLE_SG_CALIBRATION
+    float m = 0.0f;
+    float b = 0.0f;
+    switch(corners.corner_pos) {
+        case FrontLeft:
+            if (FL_WEIGHTED_ADC != FL_UNWEIGHTED_ADC) {
+                m = (FL_WEIGHTED_NEWTONS - FL_UNWEIGHTED_NEWTONS) / (float)(FL_WEIGHTED_ADC - FL_UNWEIGHTED_ADC);
+                b = FL_UNWEIGHTED_NEWTONS - m * (float)FL_UNWEIGHTED_ADC;
+            }
+            break;
+        case FrontRight:
+            if (FR_WEIGHTED_ADC != FR_UNWEIGHTED_ADC) {
+                m = (FR_WEIGHTED_NEWTONS - FR_UNWEIGHTED_NEWTONS) / (float)(FR_WEIGHTED_ADC - FR_UNWEIGHTED_ADC);
+                b = FR_UNWEIGHTED_NEWTONS - m * (float)FR_UNWEIGHTED_ADC;
+            }
+            break;
+        case BottomLeft:
+            if (BL_WEIGHTED_ADC != BL_UNWEIGHTED_ADC) {
+                m = (BL_WEIGHTED_NEWTONS - BL_UNWEIGHTED_NEWTONS) / (float)(BL_WEIGHTED_ADC - BL_UNWEIGHTED_ADC);
+                b = BL_UNWEIGHTED_NEWTONS - m * (float)BL_UNWEIGHTED_ADC;
+            }
+            break;
+        case BottomRight:
+            if (BR_WEIGHTED_ADC != BR_UNWEIGHTED_ADC) {
+                m = (BR_WEIGHTED_NEWTONS - BR_UNWEIGHTED_NEWTONS) / (float)(BR_WEIGHTED_ADC - BR_UNWEIGHTED_ADC);
+                b = BR_UNWEIGHTED_NEWTONS - m * (float)BR_UNWEIGHTED_ADC;
+            }
+            break;
+    }
+    corners.strain_gauge_newtons = m * (float)raw + b;
+#else
+    corners.strain_gauge_newtons = 0.0f;
+#endif
 }
 
 void initQueue() { q = xQueueCreate(16, sizeof(Event)); }
