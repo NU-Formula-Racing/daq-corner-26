@@ -19,11 +19,8 @@ typedef struct {
     CAN_TxHeaderTypeDef TxHeaderTemperatures2_;  // Last 4 temps
     uint8_t txDataTemperatures2_[8];
 
-    CAN_TxHeaderTypeDef TxHeaderSg_;
-    uint8_t txDataSg_[8];
-
-    CAN_TxHeaderTypeDef TxHeaderSusPot_;
-    uint8_t txDataSusPot_[8];
+    CAN_TxHeaderTypeDef TxHeaderMain_;
+    uint8_t txDataMain_[8];
 
     CAN_TxHeaderTypeDef TxHeaderError_;
     uint8_t txDataError_[8];
@@ -79,6 +76,5 @@ void main_can_loop();
 void error_can_loop();
 
 void populateCorner_TemperatureMessages(uint8_t* data, int msg_num);
-void populate_Sg_Message(uint8_t* data);
-void populate_SusPot_Message(uint8_t* data);
+void populate_Sg_SusPot_Message(uint8_t* data);
 void populateCorner_ErrorMessage(uint8_t* data);

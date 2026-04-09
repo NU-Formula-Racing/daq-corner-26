@@ -8,7 +8,6 @@ static void led_loop(void);
 static void update_status_leds(void);
 
 // Task structures
-static Task sus_pot_task = {&sus_pot_loop, 30, MEDIUM, "sus_pot", STACK_MEDIUM, NULL};
 static Task print_task = {&print_group, 500, MEDIUM, "print", STACK_MEDIUM, NULL};
 static Task main_loop_task = {&event_loop, 50, HIGH, "main_event", STACK_BIG, NULL};
 static Task temp_task = {&temp_loop, 1000, MEDIUM, "temp", STACK_MEDIUM, NULL};
@@ -23,10 +22,10 @@ static bool sus_pot_connected(void) {
 static void update_status_leds(void) {
     // PC5 indicates strain gauge connectivity.
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5,
-                      corners.strain_gauge_received ? GPIO_PIN_SET : GPIO_PIN_RESET);
+                      corners.strain_gauge_received ? GPIO_PIN_RESET : GPIO_PIN_SET);
 
     // PB0 indicates suspension potentiometer connectivity.
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, sus_pot_connected() ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, sus_pot_connected() ? GPIO_PIN_RESET : GPIO_PIN_SET);
 }
 
 static void led_loop(void) {
@@ -100,7 +99,6 @@ void initialize(SPI_HandleTypeDef* hspi, CAN_HandleTypeDef* hcan, I2C_HandleType
     // Initialize RTOS tasks
     printf("Creating RTOS tasks...\n");
     fflush(stdout);
-    createTask(&sus_pot_task);
     createTask(&print_task);
     createTask(&main_loop_task);
     createTask(&temp_task);
@@ -114,8 +112,8 @@ void initialize(SPI_HandleTypeDef* hspi, CAN_HandleTypeDef* hcan, I2C_HandleType
     // LEDs are controlled in led_loop():
     //   PC4 = corner blink code, PC5 = strain gauge connected, PB0 = sus pot connected.
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
 
     ADS_Enable_EXTI();
     printf("Initialization complete. Starting scheduler...\n");
@@ -148,14 +146,6 @@ void print_group() {
     fflush(stdout);
 }
 
-void sus_pot_loop() {
-    // sus_pot_loop seems redundant if main_loop already reads ADC,
-    // but keeping it if it's meant to be separate.
-    // Original sus_pot_loop sends EV_SUSPOT to event_loop.
-    Event sp_e = {EV_SUSPOT, NULL};  // NULL job because event_loop handles it via enum
-    xQueueSend(q, &sp_e, 0);
-}
-
 void SG_Receive_Data() {
     uint8_t spi_rx[4] = {0};
     ADS_Transmit_Data(corners.hspi, spi_rx);
@@ -166,28 +156,32 @@ void SG_Receive_Data() {
 #if ENABLE_SG_CALIBRATION
     float m = 0.0f;
     float b = 0.0f;
-    switch(corners.corner_pos) {
+    switch (corners.corner_pos) {
         case FrontLeft:
             if (FL_WEIGHTED_ADC != FL_UNWEIGHTED_ADC) {
-                m = (FL_WEIGHTED_NEWTONS - FL_UNWEIGHTED_NEWTONS) / (float)(FL_WEIGHTED_ADC - FL_UNWEIGHTED_ADC);
+                m = (FL_WEIGHTED_NEWTONS - FL_UNWEIGHTED_NEWTONS) /
+                    (float)(FL_WEIGHTED_ADC - FL_UNWEIGHTED_ADC);
                 b = FL_UNWEIGHTED_NEWTONS - m * (float)FL_UNWEIGHTED_ADC;
             }
             break;
         case FrontRight:
             if (FR_WEIGHTED_ADC != FR_UNWEIGHTED_ADC) {
-                m = (FR_WEIGHTED_NEWTONS - FR_UNWEIGHTED_NEWTONS) / (float)(FR_WEIGHTED_ADC - FR_UNWEIGHTED_ADC);
+                m = (FR_WEIGHTED_NEWTONS - FR_UNWEIGHTED_NEWTONS) /
+                    (float)(FR_WEIGHTED_ADC - FR_UNWEIGHTED_ADC);
                 b = FR_UNWEIGHTED_NEWTONS - m * (float)FR_UNWEIGHTED_ADC;
             }
             break;
         case BottomLeft:
             if (BL_WEIGHTED_ADC != BL_UNWEIGHTED_ADC) {
-                m = (BL_WEIGHTED_NEWTONS - BL_UNWEIGHTED_NEWTONS) / (float)(BL_WEIGHTED_ADC - BL_UNWEIGHTED_ADC);
+                m = (BL_WEIGHTED_NEWTONS - BL_UNWEIGHTED_NEWTONS) /
+                    (float)(BL_WEIGHTED_ADC - BL_UNWEIGHTED_ADC);
                 b = BL_UNWEIGHTED_NEWTONS - m * (float)BL_UNWEIGHTED_ADC;
             }
             break;
         case BottomRight:
             if (BR_WEIGHTED_ADC != BR_UNWEIGHTED_ADC) {
-                m = (BR_WEIGHTED_NEWTONS - BR_UNWEIGHTED_NEWTONS) / (float)(BR_WEIGHTED_ADC - BR_UNWEIGHTED_ADC);
+                m = (BR_WEIGHTED_NEWTONS - BR_UNWEIGHTED_NEWTONS) /
+                    (float)(BR_WEIGHTED_ADC - BR_UNWEIGHTED_ADC);
                 b = BR_UNWEIGHTED_NEWTONS - m * (float)BR_UNWEIGHTED_ADC;
             }
             break;
@@ -205,8 +199,6 @@ void event_loop() {
     if (xQueueReceive(q, &out, pdMS_TO_TICKS(50)) == pdPASS) {
         if (out.ev_type == EV_STRAIN) {
             SG_Receive_Data();
-        } else if (out.ev_type == EV_SUSPOT) {
-            // Handled in main_loop now, but keeping for compatibility
         } else if (out.job != NULL) {
             out.job();
         }
