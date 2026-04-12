@@ -13,28 +13,28 @@
 #define ENABLE_SG_CALIBRATION 0
 
 // Front Left Measurements
-#define FL_UNWEIGHTED_ADC      0
-#define FL_UNWEIGHTED_NEWTONS  0.0f
-#define FL_WEIGHTED_ADC        0
-#define FL_WEIGHTED_NEWTONS    0.0f
+#define FL_UNWEIGHTED_ADC 0
+#define FL_UNWEIGHTED_NEWTONS 0.0f
+#define FL_WEIGHTED_ADC 0
+#define FL_WEIGHTED_NEWTONS 0.0f
 
 // Front Right Measurements
-#define FR_UNWEIGHTED_ADC      0
-#define FR_UNWEIGHTED_NEWTONS  0.0f
-#define FR_WEIGHTED_ADC        0
-#define FR_WEIGHTED_NEWTONS    0.0f
+#define FR_UNWEIGHTED_ADC 0
+#define FR_UNWEIGHTED_NEWTONS 0.0f
+#define FR_WEIGHTED_ADC 0
+#define FR_WEIGHTED_NEWTONS 0.0f
 
 // Bottom Left Measurements
-#define BL_UNWEIGHTED_ADC      0
-#define BL_UNWEIGHTED_NEWTONS  0.0f
-#define BL_WEIGHTED_ADC        0
-#define BL_WEIGHTED_NEWTONS    0.0f
+#define BL_UNWEIGHTED_ADC 0
+#define BL_UNWEIGHTED_NEWTONS 0.0f
+#define BL_WEIGHTED_ADC 0
+#define BL_WEIGHTED_NEWTONS 0.0f
 
 // Bottom Right Measurements
-#define BR_UNWEIGHTED_ADC      0
-#define BR_UNWEIGHTED_NEWTONS  0.0f
-#define BR_WEIGHTED_ADC        0
-#define BR_WEIGHTED_NEWTONS    0.0f
+#define BR_UNWEIGHTED_ADC 0
+#define BR_UNWEIGHTED_NEWTONS 0.0f
+#define BR_WEIGHTED_ADC 0
+#define BR_WEIGHTED_NEWTONS 0.0f
 
 void initialize(SPI_HandleTypeDef* hspi, CAN_HandleTypeDef* hcan, I2C_HandleTypeDef* hi2c,
                 ADC_HandleTypeDef* hadc);

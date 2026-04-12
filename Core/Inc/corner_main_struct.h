@@ -23,9 +23,9 @@ typedef struct {
     ADC_HandleTypeDef* hadc;
 
     // Buffers
-    int32_t strain_gauge_data;
+    volatile int32_t strain_gauge_data;
     float strain_gauge_newtons;
-    uint32_t sus_pot_data;
+    volatile uint32_t sus_pot_data;
 
     // Plug-in status flags
     uint8_t strain_gauge_received;  // 1 once DRDY fires and SPI data is read

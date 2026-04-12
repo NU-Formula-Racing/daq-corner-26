@@ -78,8 +78,8 @@ void temp_can_loop() {
 
 void main_can_loop() {
     populate_Sg_SusPot_Message(corner_can.txDataMain_);
-    send_can_messages(corner_can.cornerboard->hcan, &corner_can.TxHeaderMain_, corner_can.txDataMain_,
-                      &corner_can.TxMailBox_);
+    send_can_messages(corner_can.cornerboard->hcan, &corner_can.TxHeaderMain_,
+                      corner_can.txDataMain_, &corner_can.TxMailBox_);
 }
 
 void error_can_loop() {

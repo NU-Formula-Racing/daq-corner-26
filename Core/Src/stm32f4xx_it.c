@@ -57,6 +57,7 @@
 
 /* External variables --------------------------------------------------------*/
 extern TIM_HandleTypeDef htim6;
+extern TIM_HandleTypeDef htim7;
 
 /* USER CODE BEGIN EV */
 
@@ -169,5 +170,7 @@ void TIM6_DAC_IRQHandler(void) {
 
 /* USER CODE BEGIN 1 */
 void EXTI9_5_IRQHandler(void) { HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_6); }
+
+void TIM7_IRQHandler(void) { HAL_TIM_IRQHandler(&htim7); }
 
 /* USER CODE END 1 */

@@ -51,6 +51,8 @@ I2C_HandleTypeDef hi2c1;
 
 SPI_HandleTypeDef hspi1;
 
+TIM_HandleTypeDef htim7;
+
 /* USER CODE BEGIN PV */
 static SemaphoreHandle_t printf_mutex = NULL;
 /* USER CODE END PV */
@@ -62,6 +64,7 @@ static void MX_I2C1_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_CAN1_Init(void);
 static void MX_ADC1_Init(void);
+static void MX_TIM7_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -119,6 +122,7 @@ int main(void) {
     MX_SPI1_Init();
     MX_CAN1_Init();
     MX_ADC1_Init();
+    MX_TIM7_Init();
     /* USER CODE BEGIN 2 */
     printf_mutex = xSemaphoreCreateMutex();
     initialize(&hspi1, &hcan1, &hi2c1, &hadc1);
@@ -141,16 +145,14 @@ int main(void) {
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-    // printf("interrupts called\n");
     if (GPIO_Pin != GPIO_PIN_6) {
         return;
     }
 
-    // SG_Receive_Data();
-    BaseType_t hpw = pdFALSE;
-    Event sg_e = {EV_STRAIN, NULL};
-    xQueueSendFromISR(q, &sg_e, &hpw);
-    portYIELD_FROM_ISR(hpw);
+    // Start TIM7 for 1ms debounce.
+    // This restarts the debounce timer if another edge occurs before it elapses.
+    __HAL_TIM_SET_COUNTER(&htim7, 0);
+    HAL_TIM_Base_Start_IT(&htim7);
 }
 
 /**
@@ -424,9 +426,42 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
     if (htim->Instance == TIM6) {
         HAL_IncTick();
     }
+    if (htim->Instance == TIM7) {
+        HAL_TIM_Base_Stop_IT(&htim7);
+        // Verify the pin is still low after 1ms debounce
+        if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6) == GPIO_PIN_RESET) {
+            // printf("Strain gauge interrupt triggered\n");
+            BaseType_t hpw = pdFALSE;
+            Event sg_e = {EV_STRAIN, NULL};
+            xQueueSendFromISR(q, &sg_e, &hpw);
+            portYIELD_FROM_ISR(hpw);
+        } else {
+            // False trigger, likely due to noise. Ignore.
+            // printf("Strain gauge interrupt ignored due to debounce\n");
+        }
+    }
     /* USER CODE BEGIN Callback 1 */
 
     /* USER CODE END Callback 1 */
+}
+
+static void MX_TIM7_Init(void) {
+    __HAL_RCC_TIM7_CLK_ENABLE();
+
+    // APB1 timer clock is 2 * PCLK1 = 84MHz
+    // To get 1MHz counter clock: Prescaler = 84 - 1 = 83
+    // For 1ms period: Period = 1000 - 1 = 999
+    htim7.Instance = TIM7;
+    htim7.Init.Prescaler = 83;
+    htim7.Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim7.Init.Period = 1999;
+    htim7.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    if (HAL_TIM_Base_Init(&htim7) != HAL_OK) {
+        Error_Handler();
+    }
+
+    HAL_NVIC_SetPriority(TIM7_IRQn, 6, 0);
+    HAL_NVIC_EnableIRQ(TIM7_IRQn);
 }
 
 /**
