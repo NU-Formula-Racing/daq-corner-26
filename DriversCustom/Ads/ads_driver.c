@@ -26,9 +26,7 @@ HAL_StatusTypeDef Read_ADS_Data(SPI_HandleTypeDef* hspi, uint8_t* spi_rx) {
     uint8_t spi_tx[4] = {0};
     HAL_StatusTypeDef t = HAL_SPI_TransmitReceive(hspi, spi_tx, spi_rx, 3, 100);
     if (spi_rx[0] == 0 && spi_rx[1] == 0 && spi_rx[2] == 0) {
-        // printf(
-        //     "Received all zeros from ADS! SPI Transaction Status:
-        //     %d\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", t);
+        printf("Received all zeros from ADS! SPI Transaction Status: %d\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", t);
     }
     return t;
     // printf("SPI Transaction Status %d\n", t);

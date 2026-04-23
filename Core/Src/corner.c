@@ -151,12 +151,12 @@ void SG_Receive_Data() {
     ADS_Transmit_Data(corners.hspi, spi_rx);
 
     // Check if the read is suspiciously all zero or all high (indicates communication failure or open sensor)
-    if ((spi_rx[0] == 0 && spi_rx[1] == 0 && spi_rx[2] == 0) ||
-        (spi_rx[0] == 0xFF && spi_rx[1] == 0xFF && spi_rx[2] == 0xFF)) {
-        corners.strain_gauge_received = 0U;
-        // Don't update strain_gauge_data to zero if the read failed; keep the last valid value.
-        return;
-    }
+    // if ((spi_rx[0] == 0 && spi_rx[1] == 0 && spi_rx[2] == 0) ||
+    //     (spi_rx[0] == 0xFF && spi_rx[1] == 0xFF && spi_rx[2] == 0xFF)) {
+    //     corners.strain_gauge_received = 0U;
+    //     // Don't update strain_gauge_data to zero if the read failed; keep the last valid value.
+    //     return;
+    // }
 
     int32_t raw = ((spi_rx[0] << 24) | (spi_rx[1] << 16) | spi_rx[2] << 8) >> 8;
     corners.strain_gauge_data = raw;

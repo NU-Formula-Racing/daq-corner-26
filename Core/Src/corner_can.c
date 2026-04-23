@@ -58,7 +58,7 @@ uint8_t send_can_messages(CAN_HandleTypeDef* hcan, CAN_TxHeaderTypeDef* TxHeader
             // printf("CAN message sent successfully\n");
         }
     } else {
-        printf("No free Tx mailboxes available. Message not sent.\n");
+        // printf("No free Tx mailboxes available. Message not sent.\n");
         return 1;  // Indicate failure
     }
     return 0;
