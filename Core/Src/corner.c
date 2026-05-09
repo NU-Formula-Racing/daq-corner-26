@@ -163,41 +163,9 @@ void SG_Receive_Data() {
     corners.strain_gauge_received = 1U;
 
 #if ENABLE_SG_CALIBRATION
-    float m = 0.0f;
-    float b = 0.0f;
-    switch (corners.corner_pos) {
-        case FrontLeft:
-            if (FL_WEIGHTED_ADC != FL_UNWEIGHTED_ADC) {
-                m = (FL_WEIGHTED_NEWTONS - FL_UNWEIGHTED_NEWTONS) /
-                    (float)(FL_WEIGHTED_ADC - FL_UNWEIGHTED_ADC);
-                b = FL_UNWEIGHTED_NEWTONS - m * (float)FL_UNWEIGHTED_ADC;
-            }
-            break;
-        case FrontRight:
-            if (FR_WEIGHTED_ADC != FR_UNWEIGHTED_ADC) {
-                m = (FR_WEIGHTED_NEWTONS - FR_UNWEIGHTED_NEWTONS) /
-                    (float)(FR_WEIGHTED_ADC - FR_UNWEIGHTED_ADC);
-                b = FR_UNWEIGHTED_NEWTONS - m * (float)FR_UNWEIGHTED_ADC;
-            }
-            break;
-        case BottomLeft:
-            if (BL_WEIGHTED_ADC != BL_UNWEIGHTED_ADC) {
-                m = (BL_WEIGHTED_NEWTONS - BL_UNWEIGHTED_NEWTONS) /
-                    (float)(BL_WEIGHTED_ADC - BL_UNWEIGHTED_ADC);
-                b = BL_UNWEIGHTED_NEWTONS - m * (float)BL_UNWEIGHTED_ADC;
-            }
-            break;
-        case BottomRight:
-            if (BR_WEIGHTED_ADC != BR_UNWEIGHTED_ADC) {
-                m = (BR_WEIGHTED_NEWTONS - BR_UNWEIGHTED_NEWTONS) /
-                    (float)(BR_WEIGHTED_ADC - BR_UNWEIGHTED_ADC);
-                b = BR_UNWEIGHTED_NEWTONS - m * (float)BR_UNWEIGHTED_ADC;
-            }
-            break;
-    }
-    corners.strain_gauge_newtons = m * (float)raw + b;
+    corners.strain_gauge_newtons = sg_adc_to_newtons(raw, corners.corner_pos, sg_lut);
 #else
-        corners.strain_gauge_newtons = 0.0f;
+    corners.strain_gauge_newtons = 0.0f;
 #endif
 }
 
