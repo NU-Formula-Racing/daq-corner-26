@@ -130,7 +130,7 @@ HAL_StatusTypeDef Temp_ReadOne(TempSensors* ts, uint8_t channel, float* temp_c, 
     d->i2c_error_flags = error_flags_accum;
     switch (last_step) {
         case TEMP_DIAG_STEP_MUX_SELECT:
-            printf("Failed to select mux channel %d\n", channel);
+            // printf("Failed to select mux channel %d\n", channel);
             break;
         case TEMP_DIAG_STEP_SENSOR_READ:
             printf("Failed to read temp sensor %d\n", channel);

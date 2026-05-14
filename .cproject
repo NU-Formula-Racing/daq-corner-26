@@ -52,6 +52,7 @@
 									<listOptionValue builtIn="false" value="../freertos/include"/>
 									<listOptionValue builtIn="false" value="../freertos/portable/GCC/ARM_CM4F"/>
 									<listOptionValue builtIn="false" value="../DriversCustom/RTOS"/>
+									<listOptionValue builtIn="false" value="../DriversCustom/SG"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1284404680" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>

@@ -9,7 +9,7 @@ static void update_status_leds(void);
 
 // Task structures
 static Task print_task = {&print_group, 500, MEDIUM, "print", STACK_MEDIUM, NULL};
-static Task main_loop_task = {&event_loop, 50, HIGH, "main_event", STACK_BIG, NULL};
+static Task main_loop_task = {&event_loop, 10, HIGH, "main_event", STACK_BIG, NULL};
 static Task temp_task = {&temp_loop, 1000, MEDIUM, "temp", STACK_MEDIUM, NULL};
 static Task can_error_task = {&error_can_loop, 1000, MEDIUM, "can_error", STACK_MEDIUM, NULL};
 static Task can_main_task = {&main_loop, 30, HIGH, "can_main", STACK_MEDIUM, NULL};
@@ -150,8 +150,8 @@ void SG_Receive_Data() {
     uint8_t spi_rx[4] = {0};
     ADS_Transmit_Data(corners.hspi, spi_rx);
 
-    // Check if the read is suspiciously all zero or all high (indicates communication failure or open sensor)
-    // if ((spi_rx[0] == 0 && spi_rx[1] == 0 && spi_rx[2] == 0) ||
+    // Check if the read is suspiciously all zero or all high (indicates communication failure or
+    // open sensor) if ((spi_rx[0] == 0 && spi_rx[1] == 0 && spi_rx[2] == 0) ||
     //     (spi_rx[0] == 0xFF && spi_rx[1] == 0xFF && spi_rx[2] == 0xFF)) {
     //     corners.strain_gauge_received = 0U;
     //     // Don't update strain_gauge_data to zero if the read failed; keep the last valid value.
@@ -161,43 +161,12 @@ void SG_Receive_Data() {
     int32_t raw = ((spi_rx[0] << 24) | (spi_rx[1] << 16) | spi_rx[2] << 8) >> 8;
     corners.strain_gauge_data = raw;
     corners.strain_gauge_received = 1U;
+    printf("Received strain gauge data: %ld\n", corners.strain_gauge_data);
 
 #if ENABLE_SG_CALIBRATION
-    float m = 0.0f;
-    float b = 0.0f;
-    switch (corners.corner_pos) {
-        case FrontLeft:
-            if (FL_WEIGHTED_ADC != FL_UNWEIGHTED_ADC) {
-                m = (FL_WEIGHTED_NEWTONS - FL_UNWEIGHTED_NEWTONS) /
-                    (float)(FL_WEIGHTED_ADC - FL_UNWEIGHTED_ADC);
-                b = FL_UNWEIGHTED_NEWTONS - m * (float)FL_UNWEIGHTED_ADC;
-            }
-            break;
-        case FrontRight:
-            if (FR_WEIGHTED_ADC != FR_UNWEIGHTED_ADC) {
-                m = (FR_WEIGHTED_NEWTONS - FR_UNWEIGHTED_NEWTONS) /
-                    (float)(FR_WEIGHTED_ADC - FR_UNWEIGHTED_ADC);
-                b = FR_UNWEIGHTED_NEWTONS - m * (float)FR_UNWEIGHTED_ADC;
-            }
-            break;
-        case BottomLeft:
-            if (BL_WEIGHTED_ADC != BL_UNWEIGHTED_ADC) {
-                m = (BL_WEIGHTED_NEWTONS - BL_UNWEIGHTED_NEWTONS) /
-                    (float)(BL_WEIGHTED_ADC - BL_UNWEIGHTED_ADC);
-                b = BL_UNWEIGHTED_NEWTONS - m * (float)BL_UNWEIGHTED_ADC;
-            }
-            break;
-        case BottomRight:
-            if (BR_WEIGHTED_ADC != BR_UNWEIGHTED_ADC) {
-                m = (BR_WEIGHTED_NEWTONS - BR_UNWEIGHTED_NEWTONS) /
-                    (float)(BR_WEIGHTED_ADC - BR_UNWEIGHTED_ADC);
-                b = BR_UNWEIGHTED_NEWTONS - m * (float)BR_UNWEIGHTED_ADC;
-            }
-            break;
-    }
-    corners.strain_gauge_newtons = m * (float)raw + b;
+    corners.strain_gauge_newtons = sg_adc_to_newtons(raw, corners.corner_pos, sg_lut);
 #else
-        corners.strain_gauge_newtons = 0.0f;
+    corners.strain_gauge_newtons = 0.0f;
 #endif
 }
 

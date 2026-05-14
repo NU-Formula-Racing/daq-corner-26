@@ -149,10 +149,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
         return;
     }
 
-    // Start TIM7 for 1ms debounce.
-    // This restarts the debounce timer if another edge occurs before it elapses.
-    __HAL_TIM_SET_COUNTER(&htim7, 0);
-    HAL_TIM_Base_Start_IT(&htim7);
+    BaseType_t hpw = pdFALSE;
+    Event sg_e = {EV_STRAIN, NULL};
+    xQueueSendFromISR(q, &sg_e, &hpw);
+    portYIELD_FROM_ISR(hpw);
 }
 
 /**
@@ -261,10 +261,10 @@ static void MX_CAN1_Init(void) {
 
     /* USER CODE END CAN1_Init 1 */
     hcan1.Instance = CAN1;
-    hcan1.Init.Prescaler = 6;
+    hcan1.Init.Prescaler = 2;
     hcan1.Init.Mode = CAN_MODE_NORMAL;
     hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
-    hcan1.Init.TimeSeg1 = CAN_BS1_11TQ;
+    hcan1.Init.TimeSeg1 = CAN_BS1_13TQ;
     hcan1.Init.TimeSeg2 = CAN_BS2_2TQ;
     hcan1.Init.TimeTriggeredMode = DISABLE;
     hcan1.Init.AutoBusOff = DISABLE;

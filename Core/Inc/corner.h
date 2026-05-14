@@ -4,6 +4,7 @@
 #include "corner_can.h"
 #include "corner_driver.h"
 #include "ads_driver.h"
+#include "sg_driver.h"
 #include "rtos.h"
 #include "temp.h"
 #include <math.h>
@@ -43,6 +44,7 @@ void temp_loop();
 void print_group();
 void main_loop();
 void SG_Receive_Data();
+float sg_adc_to_newtons(int32_t raw_adc, enum CornerPosition corner_pos, const sg_lut_ *sg_lut);
 
 void initQueue();
 void event_loop();
