@@ -4,7 +4,8 @@
 void populateRawMessage(RawCanSignal* signal, float raw_data, int length, float factor,
                         float offset) {
     // offset and factor data
-    uint64_t raw_value = (uint64_t)((raw_data - offset) / factor);
+    int64_t raw_value = (int64_t)((raw_data - offset) / factor);
+    // printf("Populating signal with raw value: %llu\n", raw_value);
 
     // copy data into RawCanSignal
     memcpy(&(signal->raw_data), &raw_value, sizeof(raw_value));

@@ -108,6 +108,7 @@ void populate_Sg_SusPot_Message(uint8_t* data) {
 
     // send strain gauge (bit 0) and sus pot (bit 32) as 32-bit signals in little endian order
     populateRawMessage(&signals[0], (float)corner_can.cornerboard->strain_gauge_data, 32, 1, 0);
+
     populateRawMessage(&signals[1], (float)corner_can.cornerboard->sus_pot_data, 32, 1, 0);
 
     encodeSignals(data, 2, signals[0], signals[1]);
