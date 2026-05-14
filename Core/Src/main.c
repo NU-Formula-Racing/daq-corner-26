@@ -149,10 +149,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
         return;
     }
 
-    // Start TIM7 for 1ms debounce.
-    // This restarts the debounce timer if another edge occurs before it elapses.
-    __HAL_TIM_SET_COUNTER(&htim7, 0);
-    HAL_TIM_Base_Start_IT(&htim7);
+    BaseType_t hpw = pdFALSE;
+    Event sg_e = {EV_STRAIN, NULL};
+    xQueueSendFromISR(q, &sg_e, &hpw);
+    portYIELD_FROM_ISR(hpw);
 }
 
 /**

@@ -9,7 +9,7 @@ static void update_status_leds(void);
 
 // Task structures
 static Task print_task = {&print_group, 500, MEDIUM, "print", STACK_MEDIUM, NULL};
-static Task main_loop_task = {&event_loop, 50, HIGH, "main_event", STACK_BIG, NULL};
+static Task main_loop_task = {&event_loop, 10, HIGH, "main_event", STACK_BIG, NULL};
 static Task temp_task = {&temp_loop, 1000, MEDIUM, "temp", STACK_MEDIUM, NULL};
 static Task can_error_task = {&error_can_loop, 1000, MEDIUM, "can_error", STACK_MEDIUM, NULL};
 static Task can_main_task = {&main_loop, 30, HIGH, "can_main", STACK_MEDIUM, NULL};
@@ -150,8 +150,8 @@ void SG_Receive_Data() {
     uint8_t spi_rx[4] = {0};
     ADS_Transmit_Data(corners.hspi, spi_rx);
 
-    // Check if the read is suspiciously all zero or all high (indicates communication failure or open sensor)
-    // if ((spi_rx[0] == 0 && spi_rx[1] == 0 && spi_rx[2] == 0) ||
+    // Check if the read is suspiciously all zero or all high (indicates communication failure or
+    // open sensor) if ((spi_rx[0] == 0 && spi_rx[1] == 0 && spi_rx[2] == 0) ||
     //     (spi_rx[0] == 0xFF && spi_rx[1] == 0xFF && spi_rx[2] == 0xFF)) {
     //     corners.strain_gauge_received = 0U;
     //     // Don't update strain_gauge_data to zero if the read failed; keep the last valid value.
@@ -161,6 +161,7 @@ void SG_Receive_Data() {
     int32_t raw = ((spi_rx[0] << 24) | (spi_rx[1] << 16) | spi_rx[2] << 8) >> 8;
     corners.strain_gauge_data = raw;
     corners.strain_gauge_received = 1U;
+    printf("Received strain gauge data: %ld\n", corners.strain_gauge_data);
 
 #if ENABLE_SG_CALIBRATION
     corners.strain_gauge_newtons = sg_adc_to_newtons(raw, corners.corner_pos, sg_lut);

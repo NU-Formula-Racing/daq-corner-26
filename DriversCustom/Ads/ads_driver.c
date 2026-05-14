@@ -21,20 +21,21 @@ void ADS_GPIO_to_SPI() {
     GPIO_InitStruct.Alternate = GPIO_AF5_SPI1;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 }
-
 HAL_StatusTypeDef Read_ADS_Data(SPI_HandleTypeDef* hspi, uint8_t* spi_rx) {
     uint8_t spi_tx[4] = {0};
-    HAL_StatusTypeDef t = HAL_SPI_TransmitReceive(hspi, spi_tx, spi_rx, 3, 100);
-    if (spi_rx[0] == 0 && spi_rx[1] == 0 && spi_rx[2] == 0) {
-        printf("Received all zeros from ADS! SPI Transaction Status: %d\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", t);
-    }
-    return t;
-    // printf("SPI Transaction Status %d\n", t);
-    // if (HAL_SPI_TransmitReceive(hspi, spi_tx, spi_rx, 3, 100) != HAL_OK) {
-    //     // Error
-    //     printf("ERROR\n");
+    // Increased from 3 to 4 to provide the 25th clock pulse (forcing DOUT/DRDY high)
+    HAL_StatusTypeDef t = HAL_SPI_TransmitReceive(hspi, spi_tx, spi_rx, 4, 100);
+    // if (spi_rx[0] == 0 && spi_rx[1] == 0 && spi_rx[2] == 0) {
+    //     printf("Received all zeros from ADS! SPI Transaction Status:
+    //     %d\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", t);
     // }
+    return t;
 }
+// printf("SPI Transaction Status %d\n", t);
+// if (HAL_SPI_TransmitReceive(hspi, spi_tx, spi_rx, 3, 100) != HAL_OK) {
+//     // Error
+//     printf("ERROR\n");
+// }
 
 void ADS_Enable_EXTI() {
     ADS_GPIO_to_EXTI();
