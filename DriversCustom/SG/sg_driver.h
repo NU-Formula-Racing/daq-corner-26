@@ -64,6 +64,6 @@ static const sg_lut_ sg_lut[] = {
     }
 };
 
-float sg_adc_to_newtons(int32_t raw_adc, enum CornerPosition corner_pos, const sg_lut_ *sg_lut);
+float sg_adc_to_newtons(int32_t raw_adc, enum CornerPosition corner_pos, const sg_lut_ *sg_luts);
 
 #endif

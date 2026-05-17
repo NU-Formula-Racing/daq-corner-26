@@ -3,21 +3,38 @@
 float sg_adc_to_newtons(int32_t raw_adc, enum CornerPosition corner_pos, const sg_lut_ *sg_luts) {
     const sg_lut_ *sg_lut = &sg_luts[(int)corner_pos];
     const sg_lut_point_ *sg_points = sg_lut->points;
+    uint32_t len = sg_lut->len;
 
-    if (sg_lut->len < 2) {
+    if (len < 2) {
         return 0.0f;
     }
 
-    // linearly interpolate the first two points for now
-    float b = 0.0f;
-    float m = 0.0f;
+    uint32_t idx = 0;
 
-    if (sg_points[0].adc == sg_points[1].adc) {
+    // Find the correct segment
+    // If raw_adc is less than the first point, idx remains 0 (extrapolate downwards).
+    // If raw_adc is greater than the last point, idx becomes len - 2 (extrapolate upwards).
+    if (raw_adc >= sg_points[len - 1].adc) {
+        idx = len - 2;
+    } else {
+        for (uint32_t i = 0; i < len - 1; i++) {
+            if (raw_adc >= sg_points[i].adc && raw_adc < sg_points[i + 1].adc) {
+                idx = i;
+                break;
+            }
+        }
+    }
+
+    float x0 = (float)sg_points[idx].adc;
+    float y0 = sg_points[idx].newtons;
+    float x1 = (float)sg_points[idx + 1].adc;
+    float y1 = sg_points[idx + 1].newtons;
+
+    // Prevent division by zero if ADC values are identical
+    if (x0 == x1) {
         return 0.0f;
     }
 
-    m = (sg_points[1].newtons - sg_points[0].newtons) / (sg_points[1].adc - sg_points[0].adc);
-    b = sg_points[1].newtons - m * sg_points[1].adc;
-
-    return m * (float)raw_adc + b;
+    float m = (y1 - y0) / (x1 - x0);
+    return y0 + m * ((float)raw_adc - x0);
 }
