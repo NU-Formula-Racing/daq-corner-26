@@ -24,6 +24,9 @@ typedef struct {
 
     CAN_TxHeaderTypeDef TxHeaderError_;
     uint8_t txDataError_[8];
+
+    CAN_TxHeaderTypeDef TxHeaderSusCalibrated_;
+    uint8_t txDataSusCalibrated_[8];
 } corner_can_;
 
 typedef union {
@@ -78,3 +81,4 @@ void error_can_loop();
 void populateCorner_TemperatureMessages(uint8_t* data, int msg_num);
 void populate_Sg_SusPot_Message(uint8_t* data);
 void populateCorner_ErrorMessage(uint8_t* data);
+void populateCorner_SusCalibratedMessage(uint8_t* data);

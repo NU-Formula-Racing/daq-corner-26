@@ -41,6 +41,12 @@ void Corner_Initialize_Can(cornerboard_* cornerboard) {
     corner_can.TxHeaderError_.IDE = CAN_ID_STD;
     corner_can.TxHeaderError_.RTR = CAN_RTR_DATA;
     corner_can.TxHeaderError_.DLC = 8;
+
+    // calibrated sensor values message for corner boards: 0x570
+    corner_can.TxHeaderSusCalibrated_.StdId = 0x570 + corner_can.cornerboard->corner_pos;
+    corner_can.TxHeaderSusCalibrated_.IDE = CAN_ID_STD;
+    corner_can.TxHeaderSusCalibrated_.RTR = CAN_RTR_DATA;
+    corner_can.TxHeaderSusCalibrated_.DLC = 8;
 }
 
 uint8_t send_can_messages(CAN_HandleTypeDef* hcan, CAN_TxHeaderTypeDef* TxHeader, uint8_t* data,
@@ -80,6 +86,10 @@ void main_can_loop() {
     populate_Sg_SusPot_Message(corner_can.txDataMain_);
     send_can_messages(corner_can.cornerboard->hcan, &corner_can.TxHeaderMain_,
                       corner_can.txDataMain_, &corner_can.TxMailBox_);
+
+    populateCorner_SusCalibratedMessage(corner_can.txDataSusCalibrated_);
+    send_can_messages(corner_can.cornerboard->hcan, &corner_can.TxHeaderSusCalibrated_,
+                      corner_can.txDataSusCalibrated_, &corner_can.TxMailBox_);
 }
 
 void error_can_loop() {
@@ -110,6 +120,18 @@ void populate_Sg_SusPot_Message(uint8_t* data) {
     populateRawMessage(&signals[0], (float)corner_can.cornerboard->strain_gauge_data, 32, 1, 0);
 
     populateRawMessage(&signals[1], (float)corner_can.cornerboard->sus_pot_data, 32, 1, 0);
+
+    encodeSignals(data, 2, signals[0], signals[1]);
+}
+
+void populateCorner_SusCalibratedMessage(uint8_t* data) {
+    RawCanSignal signals[2];
+
+    // send calibrated suspension potentiometer value as a 32-bit signal in little endian order
+    populateRawMessage(&signals[0], corner_can.cornerboard->sus_pot_data, 32, 1, 0);
+
+    // send calibrated strain gauge force in Newtons as a 32-bit float signal
+    populateRawMessage(&signals[1], corner_can.cornerboard->strain_gauge_newtons, 32, 1, 0);
 
     encodeSignals(data, 2, signals[0], signals[1]);
 }
