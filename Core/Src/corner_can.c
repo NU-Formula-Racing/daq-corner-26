@@ -92,7 +92,7 @@ void main_can_loop() {
                       corner_can.txDataSusCalibrated_, &corner_can.TxMailBox_);
 }
 
-void error_can_loop() {
+void can_error_loop() {
     populateCorner_ErrorMessage(corner_can.txDataError_);
     send_can_messages(corner_can.cornerboard->hcan, &corner_can.TxHeaderError_,
                       corner_can.txDataError_, &corner_can.TxMailBox_);

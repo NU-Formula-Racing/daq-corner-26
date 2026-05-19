@@ -8,11 +8,11 @@ static void led_loop(void);
 static void update_status_leds(void);
 
 // Task structures
-static Task print_task = {&print_group, 500, MEDIUM, "print", STACK_MEDIUM, NULL};
-static Task main_loop_task = {&event_loop, 10, HIGH, "main_event", STACK_BIG, NULL};
+static Task print_task = {&print_loop, 500, MEDIUM, "print", STACK_MEDIUM, NULL};
+static Task event_loop_task = {&event_loop, 10, HIGH, "main_event", STACK_BIG, NULL};
 static Task temp_task = {&temp_loop, 1000, MEDIUM, "temp", STACK_MEDIUM, NULL};
-static Task can_error_task = {&error_can_loop, 1000, MEDIUM, "can_error", STACK_MEDIUM, NULL};
-static Task can_main_task = {&main_loop, 30, HIGH, "can_main", STACK_MEDIUM, NULL};
+static Task can_error_task = {&can_error_loop, 1000, MEDIUM, "can_error", STACK_MEDIUM, NULL};
+static Task can_main_task = {&can_loop, 30, HIGH, "can_main", STACK_MEDIUM, NULL};
 static Task led_task = {&led_loop, 50, MEDIUM, "led_status", STACK_SMALL, NULL};
 
 static bool sus_pot_connected(void) {
@@ -100,7 +100,7 @@ void initialize(SPI_HandleTypeDef* hspi, CAN_HandleTypeDef* hcan, I2C_HandleType
     printf("Creating RTOS tasks...\n");
     fflush(stdout);
     createTask(&print_task);
-    createTask(&main_loop_task);
+    createTask(&event_loop_task);
     createTask(&temp_task);
     createTask(&can_error_task);
     createTask(&can_main_task);
@@ -129,12 +129,12 @@ void temp_loop() {
     temp_can_loop();
 }
 
-void main_loop() {
+void can_loop() {
     Read_Internal_ADC_Data(corners.hadc, &corners.sus_pot_data);
     main_can_loop();
 }
 
-void print_group() {
+void print_loop() {
     printf("--- Heartbeat --- Corner Position: %d\n", corners.corner_pos);
     printf("Strain Gauge Reading: %ld\n", corners.strain_gauge_data);
     printf("Strain Gauge Force: %.2f N\n", corners.strain_gauge_newtons);
