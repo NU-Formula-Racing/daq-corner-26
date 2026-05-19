@@ -161,7 +161,7 @@ void SG_Receive_Data() {
     int32_t raw = ((spi_rx[0] << 24) | (spi_rx[1] << 16) | spi_rx[2] << 8) >> 8;
     corners.strain_gauge_data = raw;
     corners.strain_gauge_received = 1U;
-    printf("Received strain gauge data: %ld\n", corners.strain_gauge_data);
+    // printf("Received strain gauge data: %ld\n", corners.strain_gauge_data);
 
 #if ENABLE_SG_CALIBRATION
 #if ENABLE_SG_LUT
