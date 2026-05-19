@@ -13,7 +13,7 @@
 // Set to 1 to enable ADC to Newtons conversion, 0 to disable if readings are not yet taken
 #define ENABLE_SG_CALIBRATION 1
 
-#define ENABLE_SG_LUT 1
+#define ENABLE_SG_LUT 0
 
 void initialize(SPI_HandleTypeDef* hspi, CAN_HandleTypeDef* hcan, I2C_HandleTypeDef* hi2c,
                 ADC_HandleTypeDef* hadc);
