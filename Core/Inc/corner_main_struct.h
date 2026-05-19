@@ -25,6 +25,7 @@ typedef struct {
     // Buffers
     volatile int32_t strain_gauge_data;
     float strain_gauge_newtons;
+    float strain_gauge_lbs;
     volatile uint32_t sus_pot_data;
 
     // Plug-in status flags

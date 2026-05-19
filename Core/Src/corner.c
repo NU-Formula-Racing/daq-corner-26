@@ -137,7 +137,7 @@ void can_loop() {
 void print_loop() {
     printf("--- Heartbeat --- Corner Position: %d\n", corners.corner_pos);
     printf("Strain Gauge Reading: %ld\n", corners.strain_gauge_data);
-    printf("Strain Gauge Force: %.2f N\n", corners.strain_gauge_newtons);
+    printf("Strain Gauge Force: %.2f lbs\n", corners.strain_gauge_lbs);
     printf("Suspension Potentiometer ADC Value: %ld\n", corners.sus_pot_data);
     for (int i = 0; i < TEMP_NUM_SENSORS; i++) {
         printf("Temp Sensor %d: %d C\n", i, (int)corners.temp_sensors.temps[i]);
@@ -165,12 +165,12 @@ void SG_Receive_Data() {
 
 #if ENABLE_SG_CALIBRATION
 #if ENABLE_SG_LUT
-    corners.strain_gauge_newtons = sg_adc_to_newtons_lut(raw, corners.corner_pos, sg_lut);
+    corners.strain_gauge_lbs = sg_adc_to_lbs_lut(raw, corners.corner_pos, sg_lut);
 #else
-    corners.strain_gauge_newtons = sg_adc_to_newtons_lobf(raw, corners.corner_pos, sg_lobf);
+    corners.strain_gauge_lbs = sg_adc_to_lbs_lobf(raw, corners.corner_pos, sg_lobf);
 #endif
 #else
-    corners.strain_gauge_newtons = 0.0f;
+    corners.strain_gauge_lbs = 0.0f;
 #endif
 }
 

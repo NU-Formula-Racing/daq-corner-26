@@ -7,7 +7,6 @@
 #include "corner_main_struct.h"
 
 #define SG_ARRAY_LEN(arr) ((uint32_t)(sizeof(arr) / sizeof((arr)[0])))
-#define LBS_TO_NEWTONS_VALUE 4.44822f
 
 typedef struct {
     int32_t adc;
@@ -112,7 +111,7 @@ static const sg_lobf_ sg_lobf[] = {
     },
 };
 
-float sg_adc_to_newtons_lut(int32_t raw_adc, enum CornerPosition corner_pos, const sg_lut_ *sg_luts);
-float sg_adc_to_newtons_lobf(int32_t raw_adc, enum CornerPosition corner_pos, const sg_lobf_ *sg_lobf);
+float sg_adc_to_lbs_lut(int32_t raw_adc, enum CornerPosition corner_pos, const sg_lut_ *sg_luts);
+float sg_adc_to_lbs_lobf(int32_t raw_adc, enum CornerPosition corner_pos, const sg_lobf_ *sg_lobf);
 
 #endif
