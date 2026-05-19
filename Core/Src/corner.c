@@ -164,7 +164,11 @@ void SG_Receive_Data() {
     printf("Received strain gauge data: %ld\n", corners.strain_gauge_data);
 
 #if ENABLE_SG_CALIBRATION
-    corners.strain_gauge_newtons = sg_adc_to_newtons(raw, corners.corner_pos, sg_lut);
+#if ENABLE_SG_LUT
+    corners.strain_gauge_newtons = sg_adc_to_newtons_lut(raw, corners.corner_pos, sg_lut);
+#else
+    corners.strain_gauge_newtons = sg_adc_to_newtons_lobf(raw, corners.corner_pos, sg_lobf);
+#endif
 #else
     corners.strain_gauge_newtons = 0.0f;
 #endif

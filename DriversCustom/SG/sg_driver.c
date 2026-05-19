@@ -1,6 +1,6 @@
 #include "sg_driver.h"
 
-float sg_adc_to_newtons(int32_t raw_adc, enum CornerPosition corner_pos, const sg_lut_ *sg_luts) {
+float sg_adc_to_newtons_lut(int32_t raw_adc, enum CornerPosition corner_pos, const sg_lut_ *sg_luts) {
     const sg_lut_ *sg_lut = &sg_luts[(int)corner_pos];
     const sg_lut_point_ *sg_points = sg_lut->points;
     uint32_t len = sg_lut->len;
@@ -36,5 +36,14 @@ float sg_adc_to_newtons(int32_t raw_adc, enum CornerPosition corner_pos, const s
     }
 
     float m = (y1 - y0) / (x1 - x0);
-    return y0 + m * ((float)raw_adc - x0);
+    float lbs = y0 + m * ((float)raw_adc - x0);
+    return lbs * LBS_TO_NEWTONS_VALUE;
+}
+
+float sg_adc_to_newtons_lobf(int32_t raw_adc, enum CornerPosition corner_pos, const sg_lobf_ *sg_lobf) {
+    float m = sg_lobf[(int)corner_pos].m;
+    float b = sg_lobf[(int)corner_pos].b;
+
+    float lbs = (float)raw_adc * m + b;
+    return lbs * LBS_TO_NEWTONS_VALUE;
 }
