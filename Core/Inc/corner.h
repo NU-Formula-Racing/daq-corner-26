@@ -19,8 +19,8 @@ void initialize(SPI_HandleTypeDef* hspi, CAN_HandleTypeDef* hcan, I2C_HandleType
                 ADC_HandleTypeDef* hadc);
 void tire_temp_group();
 void temp_loop();
-void print_group();
-void main_loop();
+void print_loop();
+void event_loop();
 void SG_Receive_Data();
 
 void initQueue();
