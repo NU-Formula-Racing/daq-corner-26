@@ -13,9 +13,10 @@ static void runJob(void* arg) {
     printf("Task %s started\n", t->name);
     fflush(stdout);
 
+    TickType_t xLastWakeTime = xTaskGetTickCount();
     for (;;) {
         t->job();
-        vTaskDelay(pdMS_TO_TICKS(t->periodMs));
+        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(t->periodMs));
     }
 }
 

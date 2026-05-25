@@ -14,7 +14,7 @@ static void can_fast_run(void);
 static Task print_task = {&print_loop, 500, MEDIUM, "print", STACK_MEDIUM, NULL};
 static Task event_loop_task = {&event_loop, 10, HIGH, "main_event", STACK_BIG, NULL};
 static Task can_slow_task = {&can_slow_run, 1000, MEDIUM, "temp", STACK_MEDIUM, NULL};
-static Task can_fast_task = {&can_fast_run, 30, HIGH, "can_main", STACK_MEDIUM, NULL};
+static Task can_fast_task = {&can_fast_run, 30, VERY_HIGH, "can_main", STACK_MEDIUM, NULL};
 static Task led_task = {&led_loop, 50, MEDIUM, "led_status", STACK_SMALL, NULL};
 
 static bool sus_pot_connected(void) {

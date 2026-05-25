@@ -65,6 +65,17 @@ uint8_t send_can_messages(CAN_HandleTypeDef* hcan, CAN_TxHeaderTypeDef* TxHeader
         xSemaphoreTake(can_tx_mutex, portMAX_DELAY);
     }
 
+    // Wait for a free mailbox if none are available (up to 5ms)
+    if (is_scheduler_running) {
+        TickType_t startTime = xTaskGetTickCount();
+        while (HAL_CAN_GetTxMailboxesFreeLevel(hcan) == 0) {
+            if ((xTaskGetTickCount() - startTime) > pdMS_TO_TICKS(5)) {
+                break;
+            }
+            vTaskDelay(pdMS_TO_TICKS(1));
+        }
+    }
+
     // Send message
     if (HAL_CAN_GetTxMailboxesFreeLevel(hcan) > 0) {
         HAL_StatusTypeDef msg_status = HAL_CAN_AddTxMessage(hcan, TxHeader, data, TxMailBox);
