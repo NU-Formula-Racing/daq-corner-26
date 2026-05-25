@@ -74,8 +74,8 @@ uint8_t send_can_messages(CAN_HandleTypeDef* hcan, CAN_TxHeaderTypeDef* TxHeader
                           uint32_t* TxMailBox);
 
 // CAN Loop
-void temp_can_loop();
-void main_can_loop();
+void can_slow_loop();
+void can_fast_loop();
 void can_error_loop();
 
 void populateCorner_TemperatureMessages(uint8_t* data, int msg_num);

@@ -2,13 +2,20 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#include "FreeRTOS.h"
+#include "semphr.h"
+#include "task.h"
 
 corner_can_ corner_can;
 static uint16_t corner_heartbeat = 0U;
 
+static SemaphoreHandle_t can_tx_mutex = NULL;
+
 void Corner_Initialize_Can(cornerboard_* cornerboard) {
     // Store cornerboard reference
     corner_can.cornerboard = cornerboard;
+
+    can_tx_mutex = xSemaphoreCreateMutex();
 
     // Start CAN
     printf("HAL_CAN_Start returned: %d\n", HAL_CAN_Start(corner_can.cornerboard->hcan));
@@ -51,26 +58,34 @@ void Corner_Initialize_Can(cornerboard_* cornerboard) {
 
 uint8_t send_can_messages(CAN_HandleTypeDef* hcan, CAN_TxHeaderTypeDef* TxHeader, uint8_t* data,
                           uint32_t* TxMailBox) {
+    uint8_t status = 0;
+    BaseType_t is_scheduler_running = (xTaskGetSchedulerState() == taskSCHEDULER_RUNNING);
+
+    if (can_tx_mutex != NULL && is_scheduler_running) {
+        xSemaphoreTake(can_tx_mutex, portMAX_DELAY);
+    }
+
     // Send message
     if (HAL_CAN_GetTxMailboxesFreeLevel(hcan) > 0) {
         HAL_StatusTypeDef msg_status = HAL_CAN_AddTxMessage(hcan, TxHeader, data, TxMailBox);
 
         if (msg_status != HAL_OK) {
             printf("Failed to send CAN message. Status: %d\n", msg_status);
-            // Error handling
-            return 1;
-
-        } else {
-            // printf("CAN message sent successfully\n");
+            status = 1;
         }
     } else {
-        // printf("No free Tx mailboxes available. Message not sent.\n");
-        return 1;  // Indicate failure
+        // No free Tx mailboxes available. Message not sent.
+        status = 1;
     }
-    return 0;
+
+    if (can_tx_mutex != NULL && is_scheduler_running) {
+        xSemaphoreGive(can_tx_mutex);
+    }
+
+    return status;
 }
 
-void temp_can_loop() {
+void can_slow_loop() {
     // Update and send temperature message 1 (first 4 temps)
     populateCorner_TemperatureMessages(corner_can.txDataTemperatures1_, 0);
     send_can_messages(corner_can.cornerboard->hcan, &corner_can.TxHeaderTemperatures1_,
@@ -80,22 +95,20 @@ void temp_can_loop() {
     populateCorner_TemperatureMessages(corner_can.txDataTemperatures2_, 1);
     send_can_messages(corner_can.cornerboard->hcan, &corner_can.TxHeaderTemperatures2_,
                       corner_can.txDataTemperatures2_, &corner_can.TxMailBox_);
-}
 
-void main_can_loop() {
-    populate_Sg_SusPot_Message(corner_can.txDataMain_);
-    send_can_messages(corner_can.cornerboard->hcan, &corner_can.TxHeaderMain_,
-                      corner_can.txDataMain_, &corner_can.TxMailBox_);
-
-    populateCorner_SusCalibratedMessage(corner_can.txDataSusCalibrated_);
-    send_can_messages(corner_can.cornerboard->hcan, &corner_can.TxHeaderSusCalibrated_,
-                      corner_can.txDataSusCalibrated_, &corner_can.TxMailBox_);
-}
-
-void can_error_loop() {
     populateCorner_ErrorMessage(corner_can.txDataError_);
     send_can_messages(corner_can.cornerboard->hcan, &corner_can.TxHeaderError_,
                       corner_can.txDataError_, &corner_can.TxMailBox_);
+
+    populate_Sg_SusPot_Message(corner_can.txDataMain_);
+    send_can_messages(corner_can.cornerboard->hcan, &corner_can.TxHeaderMain_,
+                      corner_can.txDataMain_, &corner_can.TxMailBox_);
+}
+
+void can_fast_loop() {
+    populateCorner_SusCalibratedMessage(corner_can.txDataSusCalibrated_);
+    send_can_messages(corner_can.cornerboard->hcan, &corner_can.TxHeaderSusCalibrated_,
+                      corner_can.txDataSusCalibrated_, &corner_can.TxMailBox_);
 }
 
 void populateCorner_TemperatureMessages(uint8_t* data, int msg_num) {
