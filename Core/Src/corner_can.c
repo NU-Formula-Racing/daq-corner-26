@@ -151,11 +151,11 @@ void populate_Sg_SusPot_Message(uint8_t* data) {
 void populateCorner_SusCalibratedMessage(uint8_t* data) {
     RawCanSignal signals[2];
 
-    // send calibrated suspension potentiometer value as a 32-bit signal in little endian order
-    populateRawMessage(&signals[0], corner_can.cornerboard->sus_pot_data, 32, 1, 0);
-
     // send calibrated strain gauge force in lbs as a 32-bit float signal
-    populateRawMessage(&signals[1], corner_can.cornerboard->strain_gauge_lbs, 32, 1, 0);
+    populateRawMessage(&signals[0], corner_can.cornerboard->strain_gauge_lbs, 32, 0.001, 0);
+
+    // send calibrated suspension potentiometer value as a 32-bit signal in little endian order
+    populateRawMessage(&signals[1], corner_can.cornerboard->sus_pot_data, 32, 1, 0);
 
     encodeSignals(data, 2, signals[0], signals[1]);
 }
